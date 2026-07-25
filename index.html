@@ -6,31 +6,31 @@
 <title>🌈 評語小幫手</title>
 <style>
   :root{
-    --bg:#FFF8EC;
-    --ink:#5A4632;
-    --card:#FFFFFF;
-    --c-pinxing:#FF6FA0;
-    --c-shenghuo:#3FB8AC;
-    --c-xuexiao:#5B8DEF;
-    --c-renji:#FFAA3D;
-    --c-xueye:#9B7EDE;
-    --c-fuwu:#F0654F;
-    --c-zhuanzhu:#F0B429;
-    --s60:#7FC77E;
-    --s70:#3FB8AC;
-    --s80:#FF8FB1;
-    --s90:#FF7A59;
-    --s100:#F5B92E;
+    --bg:#241C1E;
+    --ink:#E8DCC8;
+    --card:#1E1A1C;
+    --c-pinxing:#C11F44;
+    --c-shenghuo:#17967F;
+    --c-xuexiao:#1D5FC7;
+    --c-renji:#C6841A;
+    --c-xueye:#5B31C4;
+    --c-fuwu:#B5451E;
+    --c-zhuanzhu:#A98A1A;
+    --s60:#2F6B3E;
+    --s70:#1E7A6E;
+    --s80:#7A1F3D;
+    --s90:#8A2E1E;
+    --s100:#D4A017;
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
     font-family:"PingFang TC","Microsoft JhengHei","Heiti TC","Segoe UI",sans-serif;
     background:
-      radial-gradient(circle at 8% 12%, #FFE3EF 0%, transparent 40%),
-      radial-gradient(circle at 92% 8%, #DFF6F1 0%, transparent 38%),
-      radial-gradient(circle at 85% 90%, #FFF1D6 0%, transparent 40%),
-      radial-gradient(circle at 10% 92%, #E7E4FF 0%, transparent 40%),
+      radial-gradient(circle at 8% 15%, #F3B8CE 0%, transparent 45%),
+      radial-gradient(circle at 90% 10%, #A9D9B0 0%, transparent 45%),
+      radial-gradient(circle at 88% 88%, #D9A857 0%, transparent 50%),
+      radial-gradient(circle at 10% 90%, #E8B15A 0%, transparent 45%),
       var(--bg);
     color:var(--ink);
     min-height:100vh;
@@ -61,11 +61,11 @@
     font-weight:900;
     letter-spacing:1px;
     color:#FF6FA0;
-    text-shadow: 2px 2px 0 #FFE3EF;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.55);
     word-break:keep-all;
     white-space:nowrap;
   }
-  header p{margin:0;font-size:15px;color:#9C8567;overflow-wrap:break-word;}
+  header p{margin:0;font-size:15px;color:#C9B79A;overflow-wrap:break-word;}
   @media (max-width:420px){
     header h1{font-size:clamp(22px,6.5vw,42px);letter-spacing:0px;}
   }
@@ -75,7 +75,7 @@
     border-radius:26px;
     padding:22px 22px 26px;
     margin-bottom:22px;
-    box-shadow:0 10px 30px rgba(180,140,100,0.12);
+    box-shadow:0 10px 30px rgba(0,0,0,0.35);
     border:2px dashed #FFD9E8;
   }
   .panel h2{
@@ -84,7 +84,7 @@
     display:flex;
     align-items:center;
     gap:8px;
-    color:#8A6A4B;
+    color:#D9C6A8;
   }
   .badge-step{
     display:inline-flex;
@@ -92,7 +92,7 @@
     justify-content:center;
     width:24px;height:24px;
     border-radius:50%;
-    background:#FF6FA0;
+    background:#C11F44;
     color:#fff;
     font-size:13px;
     font-weight:700;
@@ -162,15 +162,15 @@
     transition:transform .12s ease;
   }
   #genBtn:active{transform:translateY(6px);box-shadow:0 2px 0 #E8578A;}
-  #hint{color:#B08A5F;font-size:13px;margin-top:10px;min-height:18px;}
+  #hint{color:#C2A67E;font-size:13px;margin-top:10px;min-height:18px;}
 
   #results{display:flex;justify-content:center;}
   .result-card{
-    background:#fff;
+    background:var(--card);
     border-radius:22px;
     padding:0;
     overflow:hidden;
-    box-shadow:0 10px 26px rgba(180,140,100,0.16);
+    box-shadow:0 10px 26px rgba(0,0,0,0.35);
     width:100%;
     max-width:780px;
     margin:0 auto;
@@ -183,11 +183,11 @@
     letter-spacing:1px;
   }
   .result-card .body{padding:20px 22px 22px;}
-  .entry{padding:14px 0;border-bottom:1px dashed #F0E2D0;}
+  .entry{padding:14px 0;border-bottom:1px dashed #3A302C;}
   .entry:last-of-type{border-bottom:none;}
   .entry-head{
     display:flex;align-items:center;gap:8px;
-    font-size:13.5px;font-weight:800;color:#8A6A4B;
+    font-size:13.5px;font-weight:800;color:#D9C6A8;
     margin-bottom:8px;
   }
   .entry-head .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
@@ -195,7 +195,7 @@
     margin:0 0 10px;
     font-size:16px;
     line-height:1.8;
-    color:#4A3B2A;
+    color:#EDE0CC;
     text-align:center;
     word-break:keep-all;
     overflow-wrap:break-word;
@@ -203,21 +203,21 @@
   .card-actions{display:flex;gap:8px;justify-content:center;}
   .mini-btn{
     border:none;cursor:pointer;
-    background:#FFF3E4;
-    color:#9C7A4A;
+    background:#2A2224;
+    color:#D8C0A0;
     font-size:12.5px;
     font-weight:700;
     padding:7px 12px;
     border-radius:12px;
     transition:background .15s;
   }
-  .mini-btn:hover{background:#FFE7C9;}
+  .mini-btn:hover{background:#3A302C;}
 
   .card-footer{
     text-align:center;
     margin-top:6px;
     padding-top:16px;
-    border-top:2px dashed #F0E2D0;
+    border-top:2px dashed #3A302C;
   }
   .copy-all-btn{
     border:none;cursor:pointer;
@@ -236,15 +236,15 @@
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-  footer{text-align:center;margin-top:36px;font-size:12.5px;color:#B79E7E;line-height:1.9;word-break:keep-all;overflow-wrap:break-word;}
-  footer b{color:#8A6A4B;}
+  footer{text-align:center;margin-top:36px;font-size:12.5px;color:#C9B394;line-height:1.9;word-break:keep-all;overflow-wrap:break-word;}
+  footer b{color:#E3CFA9;}
   .credit-tag{
     display:inline-flex;align-items:center;gap:6px;
     margin-top:14px;
     padding:6px 16px;
     border-radius:14px;
-    background:#FFF3E4;
-    color:#B08A5F;
+    background:#2A2224;
+    color:#D8C0A0;
     font-size:12px;
     font-weight:700;
     letter-spacing:0.5px;
