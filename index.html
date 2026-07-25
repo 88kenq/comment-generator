@@ -98,13 +98,13 @@
     font-weight:700;
   }
 
-  .chip-row{display:flex;flex-wrap:wrap;gap:12px;}
+  .chip-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}
   .chip{
     border:none;
     cursor:pointer;
-    padding:12px 18px;
+    padding:13px 20px;
     border-radius:18px;
-    font-size:15px;
+    font-size:18px;
     font-weight:700;
     color:#fff;
     opacity:0.38;
@@ -126,9 +126,9 @@
   .stage-row{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;}
   .stage{
     border:none;cursor:pointer;
-    width:96px;
+    width:132px;
     padding:14px 8px 12px;
-    border-radius:20px;
+    border-radius:18px;
     text-align:center;
     color:#fff;
     font-weight:700;
@@ -139,9 +139,11 @@
   }
   .stage:hover{opacity:0.75;}
   .stage.active{opacity:1;transform:scale(1.08) rotate(-2deg);box-shadow:0 6px 0 rgba(0,0,0,0.18);}
-  .stage .emoji{font-size:26px;display:block;margin-bottom:4px;}
-  .stage .num{font-size:18px;display:block;}
-  .stage .label{font-size:11px;opacity:0.9;display:block;margin-top:2px;}
+  .stage .top-row{display:flex;align-items:center;justify-content:center;gap:6px;}
+  .stage .emoji{font-size:28px;display:inline-block;}
+  .stage .num{font-size:22px;display:inline-block;line-height:1;}
+  .stage .label{font-size:22px;opacity:0.9;display:block;margin-top:4px;white-space:nowrap;}
+  .stage .mobile-break{display:none;}
   .stage[data-score="60"]{background:var(--s60);}
   .stage[data-score="70"]{background:var(--s70);}
   .stage[data-score="80"]{background:var(--s80);}
@@ -249,10 +251,45 @@
   }
 
   @media (max-width:480px){
-    .stage{width:82px;}
     .panel{padding:18px 14px 20px;}
-    #catRow{display:grid;grid-template-columns:1fr 1fr;}
-    #catRow .chip{width:100%;justify-content:center;white-space:nowrap;padding:12px 6px;font-size:14px;gap:4px;}
+  }
+
+  /* ===== 手機版專用布局(大幅重新設計,而非電腦版縮小版) ===== */
+  @media (max-width:600px){
+    /* 選擇項目:改成單欄列表,左側圖示、右側文字,滿版寬度,不會有換行問題 */
+    .chip-row{flex-direction:column;gap:10px;}
+    .chip{
+      width:100%;
+      justify-content:flex-start;
+      padding:14px 18px;
+      font-size:16px;
+      white-space:nowrap;
+      border-radius:16px;
+      gap:10px;
+    }
+    .chip .icon-badge{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:30px;height:30px;border-radius:50%;
+      background:rgba(255,255,255,0.28);
+      font-size:16px;flex-shrink:0;
+    }
+
+    /* 選擇成長階段:改成單排五欄的精簡版,拿掉容易換行的長文字說明 */
+    .stage-row{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:6px;
+    }
+    .stage{
+      width:100%;
+      padding:10px 2px 8px;
+      border-radius:14px;
+    }
+    .stage .top-row{flex-direction:column;gap:0;}
+    .stage .emoji{font-size:19px;margin-bottom:2px;}
+    .stage .num{font-size:15px;}
+    .stage .label{font-size:9px;line-height:1.25;margin-top:2px;}
+    .stage .mobile-break{display:block;}
   }
 </style>
 </head>
@@ -327,24 +364,24 @@
   <div class="panel">
     <h2><span class="badge-step">1</span>選擇項目(可複選)</h2>
     <div class="chip-row" id="catRow">
-      <button class="chip" data-cat="品行">🌟 品行</button>
-      <button class="chip" data-cat="人際">🤝 人際</button>
-      <button class="chip" data-cat="生活">🏡 生活</button>
-      <button class="chip" data-cat="學校">🏫 學校</button>
-      <button class="chip" data-cat="服務">🤲 服務</button>
-      <button class="chip" data-cat="專注">🎯 專注</button>
-      <button class="chip" data-cat="學業">📚 學業</button>
+      <button class="chip" data-cat="品行"><span class="icon-badge">🌟</span> 品行</button>
+      <button class="chip" data-cat="人際"><span class="icon-badge">🤝</span> 人際</button>
+      <button class="chip" data-cat="生活"><span class="icon-badge">🏡</span> 生活</button>
+      <button class="chip" data-cat="學校"><span class="icon-badge">🏫</span> 學校</button>
+      <button class="chip" data-cat="服務"><span class="icon-badge">🤲</span> 服務</button>
+      <button class="chip" data-cat="專注"><span class="icon-badge">🎯</span> 專注</button>
+      <button class="chip" data-cat="學業"><span class="icon-badge">📚</span> 學業</button>
     </div>
   </div>
 
   <div class="panel">
     <h2><span class="badge-step">2</span>選擇成長階段(單選)</h2>
     <div class="stage-row" id="stageRow">
-      <button class="stage" data-score="60"><span class="emoji">🌱</span><span class="num">60</span><span class="label">萌芽中</span></button>
-      <button class="stage" data-score="70"><span class="emoji">🌿</span><span class="num">70</span><span class="label">穩步<br>成長</span></button>
-      <button class="stage" data-score="80"><span class="emoji">🌸</span><span class="num">80</span><span class="label">表現<br>亮眼</span></button>
-      <button class="stage" data-score="90"><span class="emoji">🍎</span><span class="num">90</span><span class="label">傑出<br>優異</span></button>
-      <button class="stage" data-score="100"><span class="emoji">⭐</span><span class="num">100</span><span class="label">全能<br>之星</span></button>
+      <button class="stage" data-score="60"><span class="top-row"><span class="emoji">🌱</span><span class="num">60</span></span><span class="label">萌芽中</span></button>
+      <button class="stage" data-score="70"><span class="top-row"><span class="emoji">🌿</span><span class="num">70</span></span><span class="label">穩步<br class="mobile-break">成長</span></button>
+      <button class="stage" data-score="80"><span class="top-row"><span class="emoji">🌸</span><span class="num">80</span></span><span class="label">表現<br class="mobile-break">亮眼</span></button>
+      <button class="stage" data-score="90"><span class="top-row"><span class="emoji">🍎</span><span class="num">90</span></span><span class="label">傑出<br class="mobile-break">優異</span></button>
+      <button class="stage" data-score="100"><span class="top-row"><span class="emoji">⭐</span><span class="num">100</span></span><span class="label">全能<br class="mobile-break">之星</span></button>
     </div>
   </div>
 
@@ -819,6 +856,22 @@ function showToast(msg){
   clearTimeout(showToast._t);
   showToast._t = setTimeout(()=>toast.classList.remove('show'), 1600);
 }
+
+// 自動縮放:螢幕寬度比設計稿窄時,整體內容依比例縮小(最多縮到可用寬度的95%),
+// 避免按鈕被迫換行。手機版(600px以下)已有專屬版面,不套用縮放。
+const AUTO_SCALE_REF_WIDTH = 960;
+function applyAutoScale(){
+  const wrap = document.querySelector('.wrap');
+  if(window.innerWidth < 601){
+    wrap.style.zoom = '';
+    return;
+  }
+  const available = window.innerWidth * 0.95;
+  const scale = Math.min(1, available / AUTO_SCALE_REF_WIDTH);
+  wrap.style.zoom = scale;
+}
+window.addEventListener('resize', applyAutoScale);
+applyAutoScale();
 </script>
 </body>
 </html>
