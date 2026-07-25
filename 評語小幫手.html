@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌈 評語小幫手</title>
+<style>
+  :root{
+    --bg:#FFF8EC;
+    --ink:#5A4632;
+    --card:#FFFFFF;
+    --c-pinxing:#FF6FA0;
+    --c-shenghuo:#3FB8AC;
+    --c-xuexiao:#5B8DEF;
+    --c-renji:#FFAA3D;
+    --c-xueye:#9B7EDE;
+    --c-fuwu:#F0654F;
+    --c-zhuanzhu:#F0B429;
+    --s60:#7FC77E;
+    --s70:#3FB8AC;
+    --s80:#FF8FB1;
+    --s90:#FF7A59;
+    --s100:#F5B92E;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"PingFang TC","Microsoft JhengHei","Heiti TC","Segoe UI",sans-serif;
+    background:
+      radial-gradient(circle at 8% 12%, #FFE3EF 0%, transparent 40%),
+      radial-gradient(circle at 92% 8%, #DFF6F1 0%, transparent 38%),
+      radial-gradient(circle at 85% 90%, #FFF1D6 0%, transparent 40%),
+      radial-gradient(circle at 10% 92%, #E7E4FF 0%, transparent 40%),
+      var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    padding:28px 16px 60px;
+  }
+  .wrap{max-width:920px;margin:0 auto;position:relative;z-index:1;}
+
+  .mascot-watermark{
+    position:fixed;
+    left:75%;
+    bottom:-10px;
+    width:300px;
+    max-width:38vw;
+    opacity:0.1;
+    pointer-events:none;
+    z-index:0;
+    transform:translateX(-50%) rotate(-4deg);
+  }
+  .mascot-watermark svg{width:100%;height:auto;display:block;}
+  @media (max-width:600px){
+    .mascot-watermark{width:220px;max-width:55vw;bottom:0;left:75%;}
+  }
+
+  header{text-align:center;margin-bottom:30px;}
+  header h1{
+    font-size:clamp(28px,5vw,42px);
+    margin:0 0 6px;
+    font-weight:900;
+    letter-spacing:2px;
+    color:#FF6FA0;
+    text-shadow: 2px 2px 0 #FFE3EF;
+  }
+  header p{margin:0;font-size:15px;color:#9C8567;}
+
+  .panel{
+    background:var(--card);
+    border-radius:26px;
+    padding:22px 22px 26px;
+    margin-bottom:22px;
+    box-shadow:0 10px 30px rgba(180,140,100,0.12);
+    border:2px dashed #FFD9E8;
+  }
+  .panel h2{
+    font-size:16px;
+    margin:0 0 14px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:#8A6A4B;
+  }
+  .badge-step{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:24px;height:24px;
+    border-radius:50%;
+    background:#FF6FA0;
+    color:#fff;
+    font-size:13px;
+    font-weight:700;
+  }
+
+  .chip-row{display:flex;flex-wrap:wrap;gap:12px;}
+  .chip{
+    border:none;
+    cursor:pointer;
+    padding:12px 18px;
+    border-radius:18px;
+    font-size:15px;
+    font-weight:700;
+    color:#fff;
+    opacity:0.38;
+    transform:scale(0.97);
+    transition:all .18s ease;
+    display:flex;align-items:center;gap:6px;
+    box-shadow:0 4px 0 rgba(0,0,0,0.08);
+  }
+  .chip:hover{opacity:0.7;}
+  .chip.active{opacity:1;transform:scale(1.04) rotate(-1deg);box-shadow:0 5px 0 rgba(0,0,0,0.15);}
+  .chip[data-cat="品行"]{background:var(--c-pinxing);}
+  .chip[data-cat="生活"]{background:var(--c-shenghuo);}
+  .chip[data-cat="學校"]{background:var(--c-xuexiao);}
+  .chip[data-cat="人際"]{background:var(--c-renji);}
+  .chip[data-cat="學業"]{background:var(--c-xueye);}
+  .chip[data-cat="服務"]{background:var(--c-fuwu);}
+  .chip[data-cat="專注"]{background:var(--c-zhuanzhu);}
+
+  .stage-row{display:flex;flex-wrap:wrap;gap:14px;}
+  .stage{
+    border:none;cursor:pointer;
+    width:96px;
+    padding:14px 8px 12px;
+    border-radius:20px;
+    text-align:center;
+    color:#fff;
+    font-weight:700;
+    opacity:0.4;
+    transform:scale(0.95) rotate(0deg);
+    transition:all .18s ease;
+    box-shadow:0 4px 0 rgba(0,0,0,0.1);
+  }
+  .stage:hover{opacity:0.75;}
+  .stage.active{opacity:1;transform:scale(1.08) rotate(-2deg);box-shadow:0 6px 0 rgba(0,0,0,0.18);}
+  .stage .emoji{font-size:26px;display:block;margin-bottom:4px;}
+  .stage .num{font-size:18px;display:block;}
+  .stage .label{font-size:11px;opacity:0.9;display:block;margin-top:2px;}
+  .stage[data-score="60"]{background:var(--s60);}
+  .stage[data-score="70"]{background:var(--s70);}
+  .stage[data-score="80"]{background:var(--s80);}
+  .stage[data-score="90"]{background:var(--s90);}
+  .stage[data-score="100"]{background:var(--s100);}
+
+  .generate-wrap{text-align:center;margin:26px 0;}
+  #genBtn{
+    border:none;cursor:pointer;
+    background:linear-gradient(135deg,#FF6FA0,#FFAA3D);
+    color:#fff;font-size:19px;font-weight:900;
+    padding:16px 44px;
+    border-radius:30px;
+    box-shadow:0 8px 0 #E8578A;
+    letter-spacing:2px;
+    transition:transform .12s ease;
+  }
+  #genBtn:active{transform:translateY(6px);box-shadow:0 2px 0 #E8578A;}
+  #hint{color:#B08A5F;font-size:13px;margin-top:10px;min-height:18px;}
+
+  #results{display:flex;justify-content:center;}
+  .result-card{
+    background:#fff;
+    border-radius:22px;
+    padding:0;
+    overflow:hidden;
+    box-shadow:0 10px 26px rgba(180,140,100,0.16);
+    width:100%;
+    max-width:600px;
+    margin:0 auto;
+  }
+  .result-card .tape{
+    padding:14px 20px;
+    color:#fff;font-weight:800;font-size:15px;
+    text-align:center;
+    background:linear-gradient(135deg,#FF6FA0,#9B7EDE);
+    letter-spacing:1px;
+  }
+  .result-card .body{padding:20px 22px 22px;}
+  .entry{padding:14px 0;border-bottom:1px dashed #F0E2D0;}
+  .entry:last-of-type{border-bottom:none;}
+  .entry-head{
+    display:flex;align-items:center;gap:8px;
+    font-size:13.5px;font-weight:800;color:#8A6A4B;
+    margin-bottom:8px;
+  }
+  .entry-head .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+  .result-card p{
+    margin:0 0 10px;
+    font-size:16px;
+    line-height:1.8;
+    color:#4A3B2A;
+    text-align:center;
+  }
+  .card-actions{display:flex;gap:8px;justify-content:center;}
+  .mini-btn{
+    border:none;cursor:pointer;
+    background:#FFF3E4;
+    color:#9C7A4A;
+    font-size:12.5px;
+    font-weight:700;
+    padding:7px 12px;
+    border-radius:12px;
+    transition:background .15s;
+  }
+  .mini-btn:hover{background:#FFE7C9;}
+
+  .card-footer{
+    text-align:center;
+    margin-top:6px;
+    padding-top:16px;
+    border-top:2px dashed #F0E2D0;
+  }
+  .copy-all-btn{
+    border:none;cursor:pointer;
+    background:#5B8DEF;color:#fff;
+    font-weight:700;font-size:14px;
+    padding:11px 26px;border-radius:20px;
+    box-shadow:0 5px 0 #3E6BC4;
+  }
+  .copy-all-btn:active{transform:translateY(4px);box-shadow:0 1px 0 #3E6BC4;}
+
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:#4A3B2A;color:#fff;padding:10px 22px;border-radius:16px;
+    font-size:13.5px;opacity:0;pointer-events:none;transition:all .25s ease;
+    z-index:50;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  footer{text-align:center;margin-top:36px;font-size:12.5px;color:#B79E7E;line-height:1.9;}
+  footer b{color:#8A6A4B;}
+  .credit-tag{
+    display:inline-flex;align-items:center;gap:6px;
+    margin-top:14px;
+    padding:6px 16px;
+    border-radius:14px;
+    background:#FFF3E4;
+    color:#B08A5F;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.5px;
+  }
+
+  @media (max-width:480px){
+    .stage{width:82px;}
+    .panel{padding:18px 14px 20px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="mascot-watermark" aria-hidden="true">
+<svg viewBox="0 0 320 380" xmlns="http://www.w3.org/2000/svg">
+  <!-- rope tail with tuft -->
+  <path d="M225 245 C 262 258, 278 288, 262 318" stroke="#FFB23D" stroke-width="9" fill="none" stroke-linecap="round"/>
+  <ellipse cx="260" cy="326" rx="15" ry="19" fill="#FFD65C" transform="rotate(18 260 326)"/>
+  <ellipse cx="256" cy="322" rx="8" ry="12" fill="#FFB23D" transform="rotate(18 256 322)"/>
+
+  <!-- arms raised (fighting pose) -->
+  <path d="M108 210 C 70 190, 55 140, 70 95 C 78 108, 82 130, 90 150 C 98 175, 105 195, 118 212 Z" fill="#FFCB3D"/>
+  <circle cx="70" cy="90" r="20" fill="#FFCB3D"/>
+  <circle cx="70" cy="90" r="20" fill="none" stroke="#E8A93A" stroke-width="3"/>
+  <path d="M212 210 C 250 190, 265 140, 250 95 C 242 108, 238 130, 230 150 C 222 175, 215 195, 202 212 Z" fill="#FFCB3D"/>
+  <circle cx="250" cy="90" r="20" fill="#FFCB3D"/>
+  <circle cx="250" cy="90" r="20" fill="none" stroke="#E8A93A" stroke-width="3"/>
+
+  <!-- body -->
+  <ellipse cx="160" cy="260" rx="78" ry="88" fill="#FFCB3D"/>
+  <ellipse cx="160" cy="300" rx="55" ry="30" fill="#FFF3C7"/>
+
+  <!-- cow patches on body -->
+  <ellipse cx="118" cy="222" rx="20" ry="15" fill="#8A5A2B" opacity="0.9" transform="rotate(-15 118 222)"/>
+  <ellipse cx="205" cy="270" rx="17" ry="23" fill="#8A5A2B" opacity="0.9" transform="rotate(10 205 270)"/>
+  <ellipse cx="152" cy="322" rx="13" ry="9" fill="#8A5A2B" opacity="0.9"/>
+
+  <!-- droopy cow ears -->
+  <path d="M85 118 C 52 108, 36 130, 48 156 C 64 168, 92 156, 102 138 Z" fill="#FFCB3D"/>
+  <path d="M235 118 C 268 108, 284 130, 272 156 C 256 168, 228 156, 218 138 Z" fill="#FFCB3D"/>
+  <ellipse cx="68" cy="138" rx="13" ry="10" fill="#FFA24D" transform="rotate(-20 68 138)"/>
+  <ellipse cx="252" cy="138" rx="13" ry="10" fill="#FFA24D" transform="rotate(20 252 138)"/>
+
+  <!-- horns -->
+  <path d="M120 68 C 108 44, 116 18, 134 24 C 140 44, 134 64, 126 78 Z" fill="#8A5A2B"/>
+  <path d="M200 68 C 212 44, 204 18, 186 24 C 180 44, 186 64, 194 78 Z" fill="#8A5A2B"/>
+
+  <!-- head -->
+  <circle cx="160" cy="140" r="88" fill="#FFCB3D"/>
+
+  <!-- cheeks -->
+  <ellipse cx="103" cy="150" rx="14" ry="10" fill="#FFA24D"/>
+  <ellipse cx="217" cy="150" rx="14" ry="10" fill="#FFA24D"/>
+
+  <!-- eyes: happy closed arcs -->
+  <path d="M125 118 Q 138 104 151 118" stroke="#4A3B2A" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <path d="M169 118 Q 182 104 195 118" stroke="#4A3B2A" stroke-width="7" fill="none" stroke-linecap="round"/>
+
+  <!-- snout -->
+  <ellipse cx="160" cy="188" rx="46" ry="30" fill="#FFF3C7"/>
+  <ellipse cx="144" cy="188" rx="6" ry="8" fill="#8A5A2B"/>
+  <ellipse cx="176" cy="188" rx="6" ry="8" fill="#8A5A2B"/>
+  <path d="M146 208 Q 160 217 174 208" stroke="#8A5A2B" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+  <!-- speech bubble -->
+  <g>
+    <path d="M198 40 h95 a14 14 0 0 1 14 14 v34 a14 14 0 0 1 -14 14 h-58 l-16 18 v-18 h-21 a14 14 0 0 1 -14 -14 v-34 a14 14 0 0 1 14 -14 Z" fill="#FFFFFF"/>
+    <text x="248" y="70" font-family="Arial, sans-serif" font-size="24" font-weight="900" fill="#FF6FA0" text-anchor="middle">Fighting!</text>
+  </g>
+</svg>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <h1>🌈 評語小幫手</h1>
+    <p>點一點,幫每個孩子寫出被看見的正向評語 ✨</p>
+  </header>
+
+  <div class="panel">
+    <h2><span class="badge-step">1</span>選擇項目(可複選)</h2>
+    <div class="chip-row" id="catRow">
+      <button class="chip" data-cat="品行">🌟 品行</button>
+      <button class="chip" data-cat="人際">🤝 人際</button>
+      <button class="chip" data-cat="生活">🏡 生活</button>
+      <button class="chip" data-cat="學校">🏫 學校</button>
+      <button class="chip" data-cat="服務">🤲 服務</button>
+      <button class="chip" data-cat="專注">🎯 專注</button>
+      <button class="chip" data-cat="學業">📚 學業</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2><span class="badge-step">2</span>選擇成長階段(單選)</h2>
+    <div class="stage-row" id="stageRow">
+      <button class="stage" data-score="60"><span class="emoji">🌱</span><span class="num">60</span><span class="label">萌芽中</span></button>
+      <button class="stage" data-score="70"><span class="emoji">🌿</span><span class="num">70</span><span class="label">穩步成長</span></button>
+      <button class="stage" data-score="80"><span class="emoji">🌸</span><span class="num">80</span><span class="label">表現亮眼</span></button>
+      <button class="stage" data-score="90"><span class="emoji">🍎</span><span class="num">90</span><span class="label">傑出優異</span></button>
+      <button class="stage" data-score="100"><span class="emoji">⭐</span><span class="num">100</span><span class="label">全能之星</span></button>
+    </div>
+  </div>
+
+  <div class="generate-wrap">
+    <button id="genBtn">✨ 產生評語</button>
+    <div id="hint">請先選擇項目與成長階段</div>
+  </div>
+
+  <div id="results"></div>
+
+  <footer>
+    這是一個<b>單一 HTML 檔案</b>,不需安裝、不需連網。<br>
+    可以直接存到電腦或 <b>USB 隨身碟</b>帶著走,雙擊開啟即可使用。
+    <br>
+    <span class="credit-tag">🎨 Design by spppps@go.edu.tw</span>
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// 每個面向 × 每個階段有 5 句「開頭觀察句」,搭配該面向、該階段專屬的 5 句「結尾鼓勵句」
+// 開頭與結尾之間會隨機套用不同的連接詞與開場語,讓句型結構更多元
+const OPENINGS = {
+  "品行": {
+    60:["行為表現正在建立規範中","上課秩序偶有分心但態度誠懇","待人處事仍在學習分寸","對於老師的提醒能立即配合調整","是非判斷能力正逐步養成中","偶爾會忘記規範但能虛心接受","在老師陪伴下逐漸理解規範意義","個性較為害羞內向但態度誠懇顯示改進意願","個性純樸雖靦腆但漸漸展現上進心","個性較內向雖不常表達但心地誠懇善良"],
+    70:["能遵守班級規範偶爾需要提醒","對錯是非有基本判斷能力","品行表現穩定待人有禮","能配合班級常規展現負責態度","行為舉止大致得宜偶有需調整之處","能主動反省自己的言行","面對錯誤能坦然承認並改進","做事偶有粗心但能虛心接受並逐步調整","秉性忠厚待人漸趨彬彬有禮","為人誠實從不與同學爭執展現純樸的一面"],
+    80:["品行端正能主動遵守生活規範","待人接物落落大方能自我約束","表現穩重負責能以身作則","具備良好的是非判斷能力","能主動關懷並協助有需要的同學","能主動糾正他人的不當行為","對於班級公約能率先遵守","有接受批評的雅量能不斷自我反省改進","做事有條理熱心服務精神可嘉","待人誠懇有禮即使遭遇挫折仍溫柔而堅定"],
+    90:["品行優良待人接物有禮貌","誠實正直樂於助人","行為舉止得宜能自律自省","具備高度責任感與良好品格","能主動關懷他人展現同理心","能在關鍵時刻堅持原則","願意主動承擔責任毫不推託","認真執著自律甚嚴任何小事都不馬虎","遇事頗有主見能適時扮演調解紛爭的角色","個性大氣自在充滿自信又有自知之明"],
+    100:["品德操守堪稱典範","為人謙和有禮正直誠信","品格出類拔萃以身作則","一言一行皆足以感染身邊同學","展現無可挑剔的高尚品格","能在複雜情境中堅持原則且不失溫暖","始終以身作則感染周遭每一位同學","自我要求極高各項表現皆力求盡善盡美","品學兼優人見人愛是師生共同肯定的典範","品格兼具溫柔與堅毅展現難能可貴的正向能量"]
+  },
+  "生活": {
+    60:["生活自理能力正在養成中","物品整理偶爾需要協助","生活作息尚待調整","對於基本生活自理逐步掌握中","經提醒後能完成基本的生活整理","會主動詢問生活自理的方法","在老師提醒下漸漸建立好習慣","生活步調偶爾顯得慌亂但願意配合調整","生活自理仍在摸索但物品用畢會嘗試歸位","生活自理仍在學習但態度儉樸踏實"],
+    70:["生活作息大致穩定","能照顧好自己的物品與整潔","生活自理表現穩定偶爾需要提醒","能完成分內的生活自理事項","生活習慣正逐漸步上軌道","能主動完成簡單的家事協助","對於整理環境展現用心","生活習慣正在建立中態度務實不馬虎","生活習慣逐漸養成不亂發脾氣、物歸原位","生活儉樸踏實能嚴格要求自己"],
+    80:["生活習慣良好能主動整理環境","作息規律生活有條理","生活自理能力不錯兼顧整潔與效率","能妥善安排自己的生活事務","能主動照顧自己並協助整理環境","能協助同學整理公共空間","生活各項事務都能妥善兼顧","做事精明能幹對分內的生活事務毫不馬虎","生活習慣良好是個有良好教養的孩子","生活自理能力強能獨立處理自己的事務"],
+    90:["生活自理能力優異作息規律","生活態度積極主動物品整齊","生活習慣良好且自律","展現超齡的成熟與獨立能力","能妥善規劃生活各項事務","能將生活智慧分享給同學","面對突發狀況也能沉著應對","抗壓性高能妥善調整心情適應各種變化","生活自理能力強做事不疾不徐、按部就班","獨立自主能力強能規劃並實踐生活各項安排"],
+    100:["生活態度成熟細緻自律甚佳","生活自理近乎完美井然有序","對生活大小事都能妥善安排","展現卓越的自我管理能力","生活各方面表現堪稱典範","生活各面向皆展現細膩用心與智慧","即使面對變動也能從容應對安排妥當","理智冷靜處理生活大小事都能按部就班","生活各方面表現均衡動靜皆宜、令人放心","生活各面向展現高度獨立與自律令人驚艷"]
+  },
+  "學校": {
+    60:["在校常規仍在適應階段","校園生活適應中偶爾需要提醒","出缺勤穩定校園常規仍在學習","對於班級運作逐步熟悉中","經老師引導後能配合班級事務","對校園環境正逐漸熟悉","能配合老師安排完成簡單任務","在團體中較為安靜但能配合完成簡單任務","對校園生活漸漸產生歸屬感願意配合班級安排","在校默默無聞但踏實認真樂意配合班級運作"],
+    70:["能遵守校園各項規定","在校表現尚稱穩定","校園生活表現平穩遵守規範","出缺勤穩定對班級事務有參與度","能配合各項活動安排","能主動關心班級公共事務","對校園活動展現參與意願","對於班級公共事務漸漸展現參與的意願","中規中矩凡事守校規、克盡本分","在校能主動關心班級公共事務展現參與熱忱"],
+    80:["在校表現良好能主動配合活動","出缺勤良好樂於參與班級事務","校園生活適應良好","能主動協助班級運作","對校園各項規範都能落實遵守","能協助老師處理班級事務","對校園各項規範都能率先落實","能主動發現班級中需要改進的地方並提出建議","交代的課業總能如期完成絕不拖延","在校事務處理得體合宜不居功也不諉過"],
+    90:["校園生活表現優異","在校各方面表現亮眼","出缺勤紀錄優良","積極參與班級事務展現責任感","主動協助班務深受老師信賴","能主動策劃並帶領班級活動","對校園事務展現超齡的擔當","領導與溝通能力俱佳深受班級信賴","擔任班級幹部負責盡職漸入佳境","曾主動協調校內外事務成功完成重要任務"],
+    100:["在校各方面表現卓越","校園生活近乎完美主動盡責","各項校園表現皆出類拔萃","是老師的得力小幫手","展現無可挑剔的責任感與投入度","在校表現全面均衡且無懈可擊","始終是師長與同學共同倚重的核心","洞察力敏銳總能提前發現並解決班務問題","是師長心中的超級幫手各項班務皆令人放心","統籌校園事務駕輕就熟是師長高度倚重的核心人物"]
+  },
+  "人際": {
+    60:["與同學互動仍在學習合作中","人際互動偶有摩擦但願意調整","與同儕相處尚在磨合","經引導後能友善與同學相處","對於團體合作正逐步適應中","願意嘗試主動與同學互動","在小組活動中逐漸敢於表達","個性較為靦腆但願意嘗試與人互動","個性較為害羞但漸漸願意與同學互動玩樂","與同學相處雖話不多但誠懇待人不與人爭"],
+    70:["能與同學和睦相處","人際互動穩定樂於參與團體活動","與同儕互動良好偶需引導分享","能主動修復與同學的小摩擦","整體人緣不錯與同學相處融洽","能主動邀請同學一起參與活動","在小組合作中展現耐心","坦誠直率願意表達自己的想法與感受","平易近人、善解人意是很好相處的同學","待人隨和樂於團結同學、與人為善"],
+    80:["人緣良好樂於與同學分享合作","待人親切隨和善於團隊合作","人際互動表現良好","能主動關心並協助有需要的同學","深受同學喜愛樂於分享","能適時給予同學鼓勵與協助","善於化解同儕間的小衝突","富有同情心總能主動察覺同學的需要","在班上人緣很好對班上的事情都很熱心","善於聆聽樂於分享正向能量給身邊的人"],
+    90:["人際互動表現優異富同理心","深受同儕信賴與喜愛","具備良好的領導特質","能帶動團隊合作人緣極佳","樂於分享善於溝通協調","能敏銳察覺同學情緒並給予支持","善於凝聚團隊向心力","機智聰明口才佳善於化解各種紛爭","能扮演調解同學紛爭的角色令人刮目相看","深受同儕信賴能凝聚團隊氣氛帶動全班"],
+    100:["人際關係卓越出眾","溫暖體貼又富親和力","人際手腕成熟圓融","深受同儕喜愛的核心人物","展現優秀的領導與溝通能力","能圓融處理各種人際狀況且深得人心","始終是班上不可或缺的溫暖力量","觀察力敏銳總能注意到別人容易忽略的細節","深受同儕愛戴是凝聚班級情感的靈魂人物","人際魅力出眾是同學效法與超越的目標"]
+  },
+  "學業": {
+    60:["學業表現尚在努力階段","課業學習需要多加練習","學習基礎仍待穩固","對於課業概念逐步理解中","經指導後能掌握基本概念","遇到不懂的地方會主動發問","對學習逐漸展現出興趣","面對挑戰時偶有猶豫但願意嘗試不逃避","學習雖仍在摸索但求知的好奇心逐漸展現","學習雖尚未穩定但態度樸實肯下苦功"],
+    70:["學習態度認真穩定跟上進度","課業表現穩定基礎概念掌握尚可","能按部就班完成課業","學習狀況穩定進步","對課業內容能逐步理解吸收","能主動訂正錯誤並檢討原因","對於不熟悉的內容願意多加練習","反應敏捷稍加練習便能舉一反三","富進取心凡事頗有探討精神、好追根究底","學習認真踏實能克服求學過程中的困難"],
+    80:["學業表現良好學習主動積極","課業掌握度佳能舉一反三","學習成果穩定良好","能主動預習複習展現用心態度","能確實完成各項課業任務","能將所學靈活應用於生活情境","對於課業表現出高度企圖心","勇於面對困難能循序漸進解決各種難題","每項作業或作品都非常用心力求完美","學習自律甚嚴主動積極且表現穩定"],
+    90:["學業表現優異理解力強","課業成就亮眼能靈活運用所學","學習表現優異出色善於思考分析","學習動機強烈成果令人激賞","具備優異的邏輯與理解能力","能舉一反三並主動延伸學習","對艱難的題目仍保持高度熱忱","能獨立思考見解獨到不會人云亦云","語文程度優於同儕陳述完整又流暢","獨立思辨能力強不囿於既定框架敢於提出見解"],
+    100:["學業成就卓越超群","課業表現近乎完美思路清晰","學習成就傑出非凡兼具深度與廣度","展現過人的學術潛力","學習能力與求知熱忱兼具","學習表現全面均衡且深具創意","始終展現超越同齡的學術涵養","心思細膩擅長分析事理並提出獨到見解","幾乎每個學習領域都名列前茅堪稱全能學霸","學術能力遠超同齡能獨立完成高難度學習任務"]
+  },
+  "服務": {
+    60:["對於服務工作尚在嘗試階段","偶爾需要提醒才會主動幫忙","對於分派的任務能配合完成","服務態度仍在建立中","經鼓勵後願意嘗試協助班務","對於服務他人這件事還在學習","偶爾會忘記份內工作但態度願意配合","在老師引導下漸漸願意伸出援手","對服務工作漸漸產生興趣","面對服務任務偶有猶豫但願意嘗試"],
+    70:["能配合完成分內的服務工作","對於班級服務漸漸展現參與意願","服務態度穩定偶爾需要提醒","能主動協助簡單的班務工作","對於服務他人漸漸養成習慣","能按時完成被分配的服務任務","服務熱忱正逐步展現","對於團體服務事務有基本的參與度","願意配合同學一起完成服務工作","服務態度日漸積極主動"],
+    80:["服務態度良好樂於協助班務","能主動承擔班級服務工作","樂於幫助同學解決生活或課業上的困難","對於服務工作展現高度用心","能確實完成各項服務任務","服務熱心負責深獲同學信賴","能主動關心並協助需要幫助的同學","對班級公共事務展現積極的服務精神","服務工作認真盡責從不推託","樂於為班級大小事務盡一份心力"],
+    90:["服務熱忱高深受同學信賴","能主動策劃並執行班級服務活動","樂於奉獻服務精神令人感佩","服務表現優異是老師的得力助手","能敏銳發現他人需要並主動協助","服務態度積極深受師長肯定","能帶領同學一起投入服務工作","展現高度的責任感與服務熱忱","樂於分享並主動協助有需要的同學","服務精神深植人心堪為表率"],
+    100:["服務精神堪稱典範","展現無私奉獻的服務熱忱","服務表現近乎完美深獲全班信賴","始終是師長倚重的服務主力","服務熱忱感染全班堪稱楷模","展現卓越的服務領導能力","樂於奉獻不求回報令人由衷敬佩","服務工作面面俱到無懈可擊","是班級服務團隊不可或缺的核心","展現超齡的服務擔當與大愛精神"]
+  },
+  "專注": {
+    60:["上課專注力仍在建立中","容易分心但經提醒能拉回注意力","對於長時間專注仍需要練習","偶爾恍神但態度願意配合調整","在老師引導下漸漸學習專心","面對枯燥的內容容易分心","專注力尚在培養階段","經提醒後能重新聚焦於學習","對於專注這件事還在摸索方法","偶爾會分心但願意嘗試改進"],
+    70:["專注力大致穩定偶爾需要提醒","能維持一段時間的專注學習","對於感興趣的內容能專心投入","專注力逐漸提升","能配合老師的提醒重新專心","上課分心的次數逐漸減少","專注力正逐步養成中","能按部就班完成需要專注的任務","對於學習任務能保持基本專注","專注習慣正逐漸步上軌道"],
+    80:["專注力良好能持續投入學習","上課能專心聽講不易分心","能長時間維持專注完成任務","對於課業能全神貫注地投入","專注力表現穩定值得肯定","能主動排除干擾維持專心","面對困難任務仍能保持專注","專注力佳做事有始有終","能靜下心來仔細完成每項作業","上課態度專注認真不受外界影響"],
+    90:["專注力優異能長時間投入學習","面對挑戰仍能保持高度專注","專注力極佳鮮少受外界干擾","能全神貫注完成複雜的任務","展現超齡的專注力與耐心","專注投入的態度令人激賞","能長時間維持深度專注思考","專注力表現優異令人刮目相看","面對枯燥內容仍能維持高度專注","展現驚人的專注力與意志力"],
+    100:["專注力堪稱典範","展現無可挑剔的專注力","專注力近乎完美不受任何干擾","能長時間維持極致專注堪稱楷模","展現超凡的專注力與定力","專注投入的態度令人由衷敬佩","專注力表現卓越堪為全班表率","無論任務多困難都能全神貫注","展現頂尖的專注力與毅力","專注力與耐心兼具堪稱學習典範"]
+  }
+};
+
+const ENDINGS = {
+  "品行": {
+    60:["值得肯定。","展現學習動機。","持續進步中。","值得嘉勉。","潛力值得期待。","值得師長讚賞。","逐步展現進步軌跡。"],
+    70:["值得肯定。","值得放心。","值得嘉許。","逐步邁向成熟。","表現漸入佳境。","值得師長信賴。","展現穩定的自我要求。"],
+    80:["值得肯定與讚許。","深獲師長肯定。","堪為同學表率。","令人欣喜。","值得嘉許。","深受同學信賴。","展現高度自我要求。"],
+    90:["令人激賞。","堪稱同學典範。","深受肯定。","令人刮目相看。","值得高度肯定。","深受全班敬重。","展現無私的胸懷。"],
+    100:["堪稱典範。","令人讚嘆。","堪為表率。","展現無可挑剔的特質。","堪稱楷模。","堪稱品德教育的最佳示範。","令人由衷欽佩。"]
+  },
+  "生活": {
+    60:["值得鼓勵。","潛力可期。","前途可期。","未來可期。","值得欣慰。","值得欣然肯定。","逐漸展現用心。"],
+    70:["值得欣慰。","穩紮穩打。","值得期待。","漸上軌道。","令人放心。","值得肯定與讚賞。","生活步調逐漸掌握得宜。"],
+    80:["展現負責態度。","值得讚賞。","表現可圈可點。","令人激賞。","值得肯定。","值得高度肯定。","展現細膩的生活智慧。"],
+    90:["展現卓越潛力。","深受喜愛。","令人驚艷。","堪為楷模。","值得學習。","堪稱生活達人。","展現細緻入微的用心。"],
+    100:["令人驚艷不已。","展現頂尖水準。","堪稱全校模範。","令人由衷敬佩。","展現極致用心。","堪稱生活美學的典範。","令人嘆為觀止。"]
+  },
+  "學校": {
+    60:["值得嘉許。","值得期待。","漸入佳境。","逐步進步中。","值得鼓舞。","校園適應力逐步提升。","值得師長關注與肯定。"],
+    70:["展現穩定成長。","值得讚許。","態度值得嘉勉。","逐漸養成好習慣。","表現日漸成熟。","值得師長信任。","校園參與度逐步提升。"],
+    80:["深受好評。","展現十足用心。","令人欣慰。","值得嘉勉。","堪為榜樣。","深獲全班信賴。","展現高度參與熱忱。"],
+    90:["展現過人實力。","令人欽佩。","深具領袖特質。","廣受同儕敬重。","令人激賞不已。","堪稱校園之光。","展現無比的責任擔當。"],
+    100:["堪稱最佳典範。","令人拍案叫絕。","展現無比熱忱。","堪為全班表率。","令人肅然起敬。","堪稱杏壇佳話。","展現無庸置疑的卓越。"]
+  },
+  "人際": {
+    60:["展現向上動力。","顯露學習熱忱。","漸有起色。","態度值得肯定。","逐步邁向穩定。","互動氛圍逐漸融洽。","值得同儕肯定。"],
+    70:["值得肯定與嘉許。","穩步向上。","逐步提升中。","值得欣喜。","態度可圈可點。","相處氛圍日漸融洽。","值得肯定的合作態度。"],
+    80:["令人印象深刻。","展現亮眼表現。","值得讚許。","廣受肯定。","令人驕傲。","深受班上歡迎。","展現溫暖的團隊精神。"],
+    90:["展現優異水準。","值得效法。","深受師長器重。","令人讚賞。","表現出類拔萃。","深受眾人愛戴。","展現卓越的溝通魅力。"],
+    100:["展現超凡實力。","堪稱不二人選。","令人印象深刻不已。","展現完美詮釋。","堪稱師生驕傲。","堪稱人際互動的最佳範例。","令人衷心讚嘆。"]
+  },
+  "學業": {
+    60:["值得師長期待。","展現正向轉變。","值得欣喜。","穩健成長中。","值得讚許。","學習動能逐步展現。","值得肯定與陪伴。"],
+    70:["表現穩健。","逐漸展現自信。","值得師長讚許。","穩定成長中。","展現持續進步的動力。","學習步調逐漸掌握。","值得肯定的學習毅力。"],
+    80:["展現優異潛力。","值得敬佩。","表現令人激賞。","深具水準。","展現高度誠意。","展現扎實的學習基礎。","值得肯定的學習成效。"],
+    90:["展現非凡潛力。","令人矚目。","堪稱表率。","深受信賴。","展現高度熱忱。","展現驚人的學習爆發力。","堪稱學習楷模。"],
+    100:["令人讚不絕口。","展現極高水準。","堪稱典範中的典範。","令人深受感動。","展現無懈可擊的表現。","堪稱學術新星。","展現無可取代的價值。"]
+  },
+  "服務": {
+    60:["服務意願逐漸萌芽。","樂於嘗試伸出援手。","態度願意配合值得讚賞。","服務熱忱正逐步累積。","值得師長給予機會鼓勵。","展現初步的服務意願。","潛力可望持續開發。"],
+    70:["服務態度日趨穩定。","樂於配合完成分內工作。","展現逐步累積的服務經驗。","值得肯定的服務表現。","服務參與度逐步提升。","態度務實漸入佳境。","展現穩定的服務動力。"],
+    80:["服務精神可嘉深獲肯定。","樂於主動承擔班務工作。","展現十足的服務用心。","服務表現穩定令人放心。","值得肯定的服務態度。","深受同學信賴與感謝。","展現高度的服務責任感。"],
+    90:["服務熱忱令人感佩。","堪稱服務團隊的中流砥柱。","展現無私奉獻的服務精神。","深受同學倚重與信賴。","服務表現令人激賞不已。","展現卓越的服務領導力。","堪稱服務典範。"],
+    100:["服務精神堪稱典範。","展現無私奉獻的大愛精神。","服務表現近乎完美深獲信賴。","始終是師長倚重的服務主力。","服務熱忱感染全班堪稱楷模。","展現卓越的服務領導典範。","樂於奉獻不求回報令人動容。"]
+  },
+  "專注": {
+    60:["專注力正逐步萌芽。","經提醒能拉回注意力值得肯定。","專心程度逐漸提升。","定力值得肯定與鼓勵。","展現初步的專注意願。","潛力可望逐步養成。","專注習慣正逐步累積。"],
+    70:["專注力日趨穩定。","能維持專心值得肯定。","展現逐步累積的專注經驗。","值得肯定的專注表現。","專注度逐步提升。","態度沉穩漸入佳境。","展現穩定的專注動力。"],
+    80:["專注力表現良好值得肯定。","能主動維持專心令人欣慰。","展現十足的專注用心。","專注表現穩定令人放心。","值得肯定的專注態度。","深受肯定與讚賞。","展現高度的專注責任感。"],
+    90:["專注力優異令人感佩。","堪稱專注力的最佳典範。","展現超凡的專注力與定力。","深受師長肯定與讚賞。","專注表現令人刮目相看。","展現卓越的專注實力。","堪稱專注學習的典範。"],
+    100:["專注力堪稱典範。","展現無可挑剔的專注力。","專注力近乎完美不受任何干擾。","始終維持極致專注堪稱楷模。","展現超凡的定力與意志力。","專注投入的態度令人由衷欽佩。","展現頂尖的專注力與毅力。"]
+  }
+};
+
+const CAT_COLOR = {
+  "品行":"#FF6FA0","生活":"#3FB8AC","學校":"#5B8DEF","人際":"#FFAA3D","學業":"#9B7EDE","服務":"#F0654F","專注":"#F0B429"
+};
+const CAT_EMOJI = {
+  "品行":"🌟","生活":"🏡","學校":"🏫","人際":"🤝","學業":"📚","服務":"🤲","專注":"🎯"
+};
+
+let selectedCats = new Set();
+let selectedScore = null;
+let lastIndex = {}; // cat -> index used, to avoid immediate repeat on reroll
+
+const catRow = document.getElementById('catRow');
+const stageRow = document.getElementById('stageRow');
+const hint = document.getElementById('hint');
+const results = document.getElementById('results');
+
+catRow.addEventListener('click', e=>{
+  const btn = e.target.closest('.chip');
+  if(!btn) return;
+  const cat = btn.dataset.cat;
+  if(selectedCats.has(cat)){
+    selectedCats.delete(cat);
+    btn.classList.remove('active');
+  } else {
+    selectedCats.add(cat);
+    btn.classList.add('active');
+  }
+  updateHint();
+});
+
+stageRow.addEventListener('click', e=>{
+  const btn = e.target.closest('.stage');
+  if(!btn) return;
+  stageRow.querySelectorAll('.stage').forEach(s=>s.classList.remove('active'));
+  btn.classList.add('active');
+  selectedScore = btn.dataset.score;
+  updateHint();
+});
+
+function updateHint(){
+  if(selectedCats.size===0 && !selectedScore){
+    hint.textContent = "請先選擇項目與成長階段";
+  } else if(selectedCats.size===0){
+    hint.textContent = "還沒選擇項目喔(可複選) 🌟";
+  } else if(!selectedScore){
+    hint.textContent = "還沒選擇成長階段喔";
+  } else {
+    hint.textContent = `已選擇 ${selectedCats.size} 個項目 · 成長階段 ${selectedScore}`;
+  }
+}
+
+// 連接詞:讓開頭句與結尾句之間的銜接方式更多元
+const CONNECTORS = ["，", "；", "，且", "，同時", "，也", "，更"];
+
+// 開場語:隨機加在句首,增加語氣變化(留白比例較高,避免每句都固定加開場語)
+const PREFIXES = ["", "", "", "", "整體來看，", "老師觀察到，", "近期表現顯示，", "從日常表現看，", "綜合而言，", "值得一提的是，"];
+
+function pickComment(cat, score, avoidKey){
+  const opens = OPENINGS[cat][score];
+  const ends = ENDINGS[cat][score];
+  let key, text;
+  do{
+    const openIdx = Math.floor(Math.random()*opens.length);
+    const endIdx = Math.floor(Math.random()*ends.length);
+    const connIdx = Math.floor(Math.random()*CONNECTORS.length);
+    const prefIdx = Math.floor(Math.random()*PREFIXES.length);
+    key = `${openIdx}-${endIdx}-${connIdx}-${prefIdx}`;
+    text = PREFIXES[prefIdx] + opens[openIdx] + CONNECTORS[connIdx] + ends[endIdx];
+  } while(key === avoidKey);
+  return {text, idx:key};
+}
+
+function buildEntry(cat){
+  const {text, idx} = pickComment(cat, selectedScore, null);
+  lastIndex[cat] = idx;
+  const color = CAT_COLOR[cat];
+  return `
+    <div class="entry" data-cat="${cat}">
+      <div class="entry-head"><span class="dot" style="background:${color};"></span>${CAT_EMOJI[cat]} ${cat}</div>
+      <p class="comment-text">${text}</p>
+      <div class="card-actions">
+        <button class="mini-btn reroll-btn">🎲 換一句</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderMegaCard(){
+  const catList = [...selectedCats];
+  const titleText = catList.length > 1
+    ? `📝 綜合評語 · ${selectedScore}分`
+    : `📝 ${catList[0]}評語 · ${selectedScore}分`;
+
+  const card = document.createElement('div');
+  card.className = 'result-card';
+  card.innerHTML = `
+    <div class="tape">${titleText}</div>
+    <div class="body">
+      ${catList.map(buildEntry).join('')}
+      <div class="card-footer">
+        <button class="mini-btn copy-all-btn">📋 複製全部評語</button>
+      </div>
+    </div>
+  `;
+  return card;
+}
+
+document.getElementById('genBtn').addEventListener('click', ()=>{
+  if(selectedCats.size===0 || !selectedScore){
+    updateHint();
+    hint.style.color = '#FF6FA0';
+    setTimeout(()=>{hint.style.color='';}, 900);
+    return;
+  }
+  results.innerHTML = '';
+  lastIndex = {};
+  results.appendChild(renderMegaCard());
+});
+
+results.addEventListener('click', e=>{
+  const entry = e.target.closest('.entry');
+
+  if(entry && e.target.closest('.reroll-btn')){
+    const cat = entry.dataset.cat;
+    const {text, idx} = pickComment(cat, selectedScore, lastIndex[cat]);
+    lastIndex[cat] = idx;
+    entry.querySelector('.comment-text').textContent = text;
+  }
+
+  if(e.target.closest('.copy-all-btn')){
+    const entries = [...results.querySelectorAll('.entry')];
+    const all = entries.map(el=>`【${el.dataset.cat}】${el.querySelector('.comment-text').textContent}`).join('\n');
+    copyText(all);
+  }
+});
+
+function copyText(text){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  let ok = false;
+  try{ ok = document.execCommand('copy'); }catch(e){ ok = false; }
+  document.body.removeChild(ta);
+
+  if(ok){
+    showToast('已複製到剪貼簿 ✅');
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(()=>showToast('已複製到剪貼簿 ✅'))
+      .catch(()=>showToast('複製失敗,請手動選取文字'));
+  } else {
+    showToast('複製失敗,請手動選取文字');
+  }
+}
+
+function showToast(msg){
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=>toast.classList.remove('show'), 1600);
+}
+</script>
+</body>
+</html>
