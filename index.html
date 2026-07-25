@@ -694,11 +694,11 @@ function updateHint(){
 // 連接詞:讓開頭句與結尾句之間的銜接方式更多元
 const CONNECTORS = ["，", "；", "，且", "，同時", "，也", "，更"];
 
-// 開場語:只有約 10%(十次約出現一次)的機率會加在句首,其餘時候維持簡潔不加開場語
+// 開場語:只有約 5%(二十次約出現一次)的機率會加在句首,其餘時候維持簡潔不加開場語
 const PREFIXES = ["整體來看，", "老師觀察到，", "近期表現顯示，", "從日常表現看，", "綜合而言，", "值得一提的是，"];
 
 function getPrefixInfo(){
-  if(Math.random() >= 0.1){
+  if(Math.random() >= 0.05){
     return {text:"", key:'p_none'};
   }
   const prefIdx = Math.floor(Math.random()*PREFIXES.length);
