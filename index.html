@@ -290,6 +290,13 @@
     .stage .num{font-size:15px;}
     .stage .label{font-size:9px;line-height:1.25;margin-top:2px;}
     .stage .mobile-break{display:block;}
+
+    /* 評語文字:改成一般斷行(不限標點)+齊行,讓每行字數平均,最後一行維持置中 */
+    .result-card p{
+      word-break:normal;
+      text-align:justify;
+      text-align-last:center;
+    }
   }
 </style>
 </head>
