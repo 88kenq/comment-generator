@@ -260,6 +260,14 @@
     box-shadow:0 5px 0 #B8641A;
   }
   .merge-btn:active{transform:translateY(4px);box-shadow:0 1px 0 #B8641A;}
+  .rerollall-btn{
+    border:none;cursor:pointer;
+    background:#3FB871;color:#fff;
+    font-weight:800;font-size:14px;
+    padding:11px 26px;border-radius:20px;
+    box-shadow:0 5px 0 #297F4C;
+  }
+  .rerollall-btn:active{transform:translateY(4px);box-shadow:0 1px 0 #297F4C;}
 
   .toast{
     position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
@@ -808,6 +816,7 @@ function renderMegaCard(){
     <div class="body">
       ${catList.map(buildEntry).join('')}
       <div class="card-footer">
+        <button class="mini-btn rerollall-btn">🔄 一鍵更換評語</button>
         ${mergeUI}
         <button class="mini-btn copy-all-btn">📋 複製全部評語</button>
       </div>
@@ -830,9 +839,12 @@ document.getElementById('genBtn').addEventListener('click', ()=>{
 
 function mergeComments(){
   const entries = [...results.querySelectorAll('.entry')];
-  const usedSegments = []; // 已使用過的詞語片段,用來比對避免重複
-  const usedLeadWords = new Set(); // 已使用過的開頭詞彙(如:值得/深受/展現/堪稱),避免同一詞彙重複開頭
+  const usedSegments = []; // 已使用過的詞語片段(完整文字),用來比對整句重複
+  const usedKeywords = new Set(); // 已使用過的稱讚關鍵詞,不論出現在片段中的哪個位置都會被登記
+  const KEY_VERBS = ['值得', '深受', '展現', '堪稱', '堪為', '令人', '廣受', '廣獲', '始終']; // 常見的稱讚收尾動詞,是撞詞的主要來源
   const FILLER_WORDS = ['同時', '並且', '而且', '此外', '也', '更', '且']; // 句子內部殘留的連接詞,需先剝除才能正確比對
+  // 通用收尾語:當原本的收尾片段跟前面重複時,用這些替換,確保句子仍有收尾且不撞詞(特意不含任何 KEY_VERBS,避免自己又撞詞)
+  const FALLBACK_CLOSERS = ['整體表現十分穩定', '各方面都有不錯的成長', '都能感受到滿滿的用心', '確實下了不少功夫', '相當難能可貴', '一路走來進步有目共睹', '步步踏實穩健向前', '點滴累積成長看得見'];
 
   function stripFiller(seg){
     for(const f of FILLER_WORDS){
@@ -841,13 +853,23 @@ function mergeComments(){
     return seg;
   }
 
-  function isDuplicate(seg){
-    if(usedSegments.some(u => u.includes(seg) || seg.includes(u))) return true;
-    if(seg.length <= 14){
-      const lead = seg.slice(0,2);
-      if(usedLeadWords.has(lead)) return true;
-    }
-    return false;
+  function findKeywords(text){
+    return KEY_VERBS.filter(k => text.includes(k));
+  }
+  function isSubstringDuplicate(seg){
+    return usedSegments.some(u => u.includes(seg) || seg.includes(u));
+  }
+  function hasKeywordConflict(seg){
+    return findKeywords(seg).some(k => usedKeywords.has(k));
+  }
+  function pickFallbackCloser(){
+    const free = FALLBACK_CLOSERS.filter(f => !isSubstringDuplicate(f) && !hasKeywordConflict(f));
+    const pool = free.length ? free : FALLBACK_CLOSERS;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+  function registerSeg(seg){
+    usedSegments.push(seg);
+    findKeywords(seg).forEach(k => usedKeywords.add(k));
   }
 
   const clauses = entries.map(el=>{
@@ -860,15 +882,25 @@ function mergeComments(){
     else if(s.startsWith('你')) s = s.slice(1);   // 去掉開頭的「你」
     s = s.replace(/你/g, '');                     // 保險:清掉句子中間任何殘留的「你」
 
-    // 以逗號、分號拆成片段,並剝除片段開頭殘留的連接詞,再比對是否與前面已出現過的片段重複,重複的片段就拿掉
+    // 以逗號、分號拆成片段,並剝除片段開頭殘留的連接詞
     const segments = s.split(/[，,；;]/).map(seg => stripFiller(seg.trim())).filter(Boolean);
     const kept = [];
-    segments.forEach(seg=>{
-      if(!isDuplicate(seg)){
+    segments.forEach((seg, idx)=>{
+      const isLastSeg = idx === segments.length - 1;
+      const duplicate = isSubstringDuplicate(seg) || hasKeywordConflict(seg);
+
+      if(!duplicate){
         kept.push(seg);
-        usedSegments.push(seg);
-        if(seg.length <= 14) usedLeadWords.add(seg.slice(0,2));
+        registerSeg(seg);
+        return;
       }
+      if(isLastSeg && !isSubstringDuplicate(seg)){
+        // 收尾片段撞了稱讚關鍵詞(不是整句重複):換成通用收尾語,而不是整段刪除,確保句子有頭有尾
+        const closer = pickFallbackCloser();
+        kept.push(closer);
+        registerSeg(closer);
+      }
+      // 其餘情況(非收尾片段撞詞,或收尾片段整句完全重複)直接跳過該片段
     });
     return kept.join('，');
   }).filter(c => c.length > 0); // 整句都重複被清空的話,直接跳過該面向
@@ -890,6 +922,18 @@ results.addEventListener('click', e=>{
     const {text, idx} = pickComment(cat, selectedScore, lastIndex[cat]);
     lastIndex[cat] = idx;
     entry.querySelector('.comment-text').textContent = text;
+    const block = results.querySelector('.merge-block');
+    if(block) block.style.display = 'none';
+  }
+
+  if(e.target.closest('.rerollall-btn')){
+    const allEntries = [...results.querySelectorAll('.entry')];
+    allEntries.forEach(el=>{
+      const cat = el.dataset.cat;
+      const {text, idx} = pickComment(cat, selectedScore, lastIndex[cat]);
+      lastIndex[cat] = idx;
+      el.querySelector('.comment-text').textContent = text;
+    });
     const block = results.querySelector('.merge-block');
     if(block) block.style.display = 'none';
   }
