@@ -231,15 +231,15 @@
     border:2px dashed #C11F44;
   }
   .merge-block .merge-label{
-    font-size:12px;font-weight:800;color:#E86A8A;
+    font-size:12px;font-weight:800;color:#FF7A97;
     text-align:center;margin-bottom:6px;letter-spacing:1px;
   }
   .merge-block p{
     margin:0;
-    font-size:16px;
-    font-weight:600;
+    font-size:18px;
+    font-weight:700;
     line-height:1.85;
-    color:#EDE0CC;
+    color:#FFF6E8;
     text-align:center;
     word-break:keep-all;
     overflow-wrap:break-word;
@@ -252,6 +252,14 @@
     box-shadow:0 5px 0 #3E6BC4;
   }
   .copy-all-btn:active{transform:translateY(4px);box-shadow:0 1px 0 #3E6BC4;}
+  .merge-btn{
+    border:none;cursor:pointer;
+    background:#F0932B;color:#1A1210;
+    font-weight:800;font-size:14px;
+    padding:11px 26px;border-radius:20px;
+    box-shadow:0 5px 0 #B8641A;
+  }
+  .merge-btn:active{transform:translateY(4px);box-shadow:0 1px 0 #B8641A;}
 
   .toast{
     position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
@@ -865,7 +873,7 @@ function mergeComments(){
     return kept.join('，');
   }).filter(c => c.length > 0); // 整句都重複被清空的話,直接跳過該面向
 
-  const joiners = ['，同時', '，並且', '，也', '，而且', '，此外'];
+  const joiners = ['，同時', '，並且', '，而且', '，此外', '，另外', '，再者', '，其次', '，接著', '，不僅如此', '，更進一步來說', '，與此同時'];
   let merged = '你';
   clauses.forEach((c, i)=>{
     merged += (i===0 ? c : joiners[(i-1) % joiners.length] + c);
