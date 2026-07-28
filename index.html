@@ -164,7 +164,7 @@
     transition:transform .12s ease;
   }
   #genBtn:active{transform:translateY(6px);box-shadow:0 2px 0 #E8578A;}
-  #hint{color:#C2A67E;font-size:13px;margin-top:10px;min-height:18px;}
+  #hint{color:#000000;font-size:13px;margin-top:10px;min-height:18px;}
 
   #results{display:flex;justify-content:center;}
   .result-card{
@@ -466,7 +466,7 @@
 
   <div class="generate-wrap">
     <button id="genBtn">✨ 產生評語</button>
-    <div id="hint">請先選擇項目與成長階段</div>
+    <div id="hint">請先選擇項目與成長階段！！</div>
   </div>
 
   <div id="results"></div>
@@ -782,6 +782,7 @@ function updateHint(){
   } else {
     hint.textContent = `已選擇 ${selectedCats.size} 個項目 · 成長階段 ${selectedScore} ${addedNote}`;
   }
+  hint.textContent += '！！';
 }
 
 function updateGenBtnLabel(){
@@ -887,9 +888,6 @@ function addEntries(cats, score){
 document.getElementById('genBtn').addEventListener('click', ()=>{
   if(selectedCats.size===0 || !selectedScore){
     updateHint();
-    hint.textContent += '！！';
-    hint.style.color = '#000000';
-    setTimeout(()=>{hint.style.color='';}, 900);
     return;
   }
   const existingCats = new Set([...results.querySelectorAll('.entry')].map(el=>el.dataset.cat));
@@ -1103,6 +1101,7 @@ function applyAutoScale(){
 window.addEventListener('resize', applyAutoScale);
 applyAutoScale();
 updateGenBtnLabel();
+updateHint();
 </script>
 </body>
 </html>
