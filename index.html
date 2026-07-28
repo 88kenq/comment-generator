@@ -326,6 +326,9 @@
     }
 
     /* 選擇成長階段:改成單排五欄的精簡版,拿掉容易換行的長文字說明 */
+    .panel h2{flex-wrap:wrap;}
+    .unibreak{flex-basis:100%;margin-top:2px;font-size:13px;}
+
     .stage-row{
       display:grid;
       grid-template-columns:repeat(5,1fr);
@@ -454,7 +457,7 @@
   </div>
 
   <div class="panel">
-    <h2><span class="badge-step">2</span>選擇成長階段(單選)</h2>
+    <h2><span class="badge-step">2</span>選擇成長階段<span class="unibreak">(單選)</span></h2>
     <div class="stage-row" id="stageRow">
       <button class="stage" data-score="60"><span class="top-row"><span class="emoji">🌱</span><span class="num">60</span></span><span class="label">萌芽中</span></button>
       <button class="stage" data-score="70"><span class="top-row"><span class="emoji">🌿</span><span class="num">70</span></span><span class="label">穩步<br class="mobile-break">成長</span></button>
