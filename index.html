@@ -819,7 +819,7 @@ function renderMegaCard(){
     ? `📝 評語組合 · ${selectedScore}分`
     : `📝 ${catList[0]}評語 · ${selectedScore}分`;
 
-  const mergeUI = catList.length > 2 ? `
+  const mergeUI = catList.length >= 2 ? `
     <div class="merge-block" style="display:none;">
       <div class="merge-label">🔗 整合評語</div>
       <p class="merge-text"></p>
