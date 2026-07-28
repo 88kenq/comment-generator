@@ -887,7 +887,8 @@ function addEntries(cats, score){
 document.getElementById('genBtn').addEventListener('click', ()=>{
   if(selectedCats.size===0 || !selectedScore){
     updateHint();
-    hint.style.color = '#FF6FA0';
+    hint.textContent += '！！';
+    hint.style.color = '#000000';
     setTimeout(()=>{hint.style.color='';}, 900);
     return;
   }
