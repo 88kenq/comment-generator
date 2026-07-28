@@ -115,6 +115,8 @@
   }
   .chip:hover{opacity:0.7;}
   .chip.active{opacity:1;transform:scale(1.04) rotate(-1deg);box-shadow:0 5px 0 rgba(0,0,0,0.15);}
+  .chip.used{opacity:0.3;filter:grayscale(55%);cursor:not-allowed;transform:scale(0.95);}
+  .chip.used:hover{opacity:0.3;}
   .chip[data-cat="品行"]{background:var(--c-pinxing);}
   .chip[data-cat="生活"]{background:var(--c-shenghuo);}
   .chip[data-cat="學校"]{background:var(--c-xuexiao);}
@@ -268,6 +270,14 @@
     box-shadow:0 5px 0 #297F4C;
   }
   .rerollall-btn:active{transform:translateY(4px);box-shadow:0 1px 0 #297F4C;}
+  .reset-btn{
+    border:none;cursor:pointer;
+    background:#7A6A5C;color:#fff;
+    font-weight:800;font-size:14px;
+    padding:11px 26px;border-radius:20px;
+    box-shadow:0 5px 0 #4E4238;
+  }
+  .reset-btn:active{transform:translateY(4px);box-shadow:0 1px 0 #4E4238;}
 
   .toast{
     position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
@@ -343,7 +353,7 @@
     .card-footer{
       padding:16px 4px 0;
     }
-    .rerollall-btn, .merge-btn, .copy-all-btn{
+    .rerollall-btn, .merge-btn, .copy-all-btn, .reset-btn{
       width:100%;
       padding:13px 12px;
       font-size:15px;
@@ -477,14 +487,14 @@
 const OPENINGS = {
   "品行": {
     60: [
-      "你行為表現正在建立規範中", "你上課秩序偶有分心但態度誠懇", "你待人處事仍在學習分寸", "你對於老師的提醒能立即配合調整", "你是非判斷能力正逐步養成中",
+      "你行為表現正嘗試建立規範", "你上課秩序偶有分心但態度誠懇", "你待人處事仍在學習分寸", "你對於老師的提醒能立即配合調整", "你是非判斷能力",
       "你偶爾會忘記規範但能虛心接受", "你在老師陪伴下逐漸理解規範意義", "你個性較為害羞內向但態度誠懇顯示改進意願", "你個性純樸雖靦腆但漸漸展現上進心", "你個性較內向雖不常表達但心地誠懇善良",
       "你為人誠懇但偶爾容易感情用事", "你正努力學習控制自身情緒與脾氣", "你對於常規的遵守偶爾需要提點", "你在行為自律上正展現微小的進步", "你個性天真活潑但尚需學習收斂",
-      "你偶爾會因一時衝動而違反紀律", "你對於班級規範的認知正逐漸加深", "你雖然偶有小過失但能勇於認錯", "你在師長的引導下逐漸明辨是非", "你正嘗試改掉不經意的不良小習慣", "你個性較為樸實，行為規範仍在建立中"],
+      "你偶爾會有些小衝動", "你對於班級規範的認知正逐漸加深", "你雖然偶有小過失但能勇於認錯", "你在師長的引導下逐漸明辨是非", "你正嘗試改掉不經意的不良小習慣", "你個性較為樸實，行為規範仍在建立中"],
     70: [
       "你能遵守班級規範偶爾需要提醒", "你對錯是非有基本判斷能力", "你品行表現穩定待人有禮", "你能配合班級常規展現負責態度", "你行為舉止大致得宜偶有需調整之處",
       "你能主動反省自己的言行", "你面對錯誤能坦然承認並改進", "你做事偶有粗心但能虛心接受並逐步調整", "你秉性忠厚待人漸趨彬彬有禮", "你為人誠實從不與同學爭執展現純樸的一面",
-      "你性情敦厚誠實可信待人有禮", "你大多能自我克制且安分守己", "你待人接物進退有度且不逾矩", "你雖然話不多但總能默默守規矩", "你能友善對待師長與同學不生事端",
+      "你性情敦厚、誠實可信、待人有禮", "你大多能自我克制且安分守己", "你待人接物進退有度且不逾矩", "你雖然話不多但總能默默守規矩", "你能友善對待師長與同學不生事端",
       "你具備基本的同理心與良善的道德感", "你偶有調皮但總能知錯能改", "你個性溫和不喜與人發生衝突", "你在常規表現上維持著穩定的水準", "你漸漸懂得替他人著想並收斂自我", "你能遵守生活常規，性情溫和，不與人爭"],
     80: [
       "你品行端正能主動遵守生活規範", "你待人接物落落大方能自我約束", "你表現穩重負責能以身作則", "你具備良好的是非判斷能力", "你能主動關懷並協助有需要的同學",
@@ -505,9 +515,9 @@ const OPENINGS = {
   "生活": {
     60: [
       "你生活自理能力正在養成中", "你物品整理偶爾需要協助", "你生活作息尚待調整", "你對於基本生活自理逐步掌握中", "你經提醒後能完成基本的生活整理",
-      "你會主動詢問生活自理的方法", "你在老師提醒下漸漸建立好習慣", "你生活步調偶爾顯得慌亂但願意配合調整", "你生活自理仍在摸索但物品用畢會嘗試歸位", "你生活自理仍在學習但態度儉樸踏實",
+      "你會主動詢問生活自理的方法", "你在老師提醒下漸漸建立好習慣", "你生活步調偶爾顯得慌亂，但願意配合調整", "你生活自理仍在摸索但物品用畢會嘗試歸位", "你生活自理仍在學習但態度儉樸踏實",
       "你生活自理仍在摸索但態度願意配合", "你對於個人衛生的維持正努力學習中", "你偶爾會忘記帶齊學用品但漸有改善", "你座位周遭的整潔狀況正逐步建立標準", "你正在學習如何妥善分配自己的下課時間",
-      "你漸漸懂得愛惜公物與妥善保管個人物品", "你的飲食習慣正慢慢調整至較為均衡的狀態", "你的穿著儀容正學習保持基本的整潔", "你對於生活常規的記憶與遵守漸漸加深", "你在校園安全與自我保護認知上正逐步提升", "你物品用畢偶爾會忘記歸位但態度願意配合"],
+      "你漸漸懂得愛惜公物與妥善保管個人物品", "你的飲食習慣正慢慢調整至較為均衡的狀態", "你的穿著儀容學會保持基本整潔", "你對於生活常規的記憶與遵守漸漸加深", "你在校園安全與自我保護認知上正逐步提升", "你物品用畢偶爾會忘記歸位但態度願意配合"],
     70: [
       "你生活作息大致穩定", "你能照顧好自己的物品與整潔", "你生活自理表現穩定偶爾需要提醒", "你能完成分內的生活自理事項", "你生活習慣正逐漸步上軌道",
       "你能主動完成簡單的家事協助", "你對於整理環境展現用心", "你生活習慣正在建立中，態度務實不馬虎", "你生活習慣逐漸養成不亂發脾氣、物歸原位", "你生活儉樸踏實能嚴格要求自己",
@@ -537,7 +547,7 @@ const OPENINGS = {
       "你在下課時間漸漸能找到自己的休閒步調", "你對於集會活動的秩序要求正學習掌握", "你在校園中的步伐正慢慢走得穩健踏實", "你正努力學習與校園環境和平共處的模式", "你在師長的引導下漸漸習慣並接受學校生活", "你對校園規範仍在適應，態度願意配合"],
     70: [
       "你能遵守校園各項規定", "你在校表現尚稱穩定", "你校園生活表現平穩遵守規範", "你出缺勤穩定對班級事務有參與度", "你能配合各項活動安排",
-      "你能主關心班級公共事務", "你對校園活動展現參與意願", "你對於班級公共事務漸漸展現參與的意願", "你中規中矩凡事守校規、克盡本分", "你在校能主動關心班級公共事務展現參與熱忱",
+      "你能主動關心班級公共事務", "你對校園活動展現參與意願", "你對於班級公共事務漸漸展現參與的意願", "你中規中矩凡事守校規、克盡本分", "你在校能主動關心班級公共事務，展現參與熱忱",
       "你能自覺遵守學校紀律尊敬師長", "你上學總能保持準時且維持良好的出席率", "你參與升旗與集會時能保持安靜與秩序", "你對於各項處室的宣導事項能留心傾聽", "你在校園中遇到師長總能大方問好",
       "你對於學校舉辦的各項活動抱持正向態度", "你擔任小老師或值日生時能盡到基本本分", "你能在校園的各個角落維持良好的行儀", "你在校表現中規中矩是個守本分的學生", "你漸漸在班級群體中找到自己的定位與角色", "你能中規中矩，遵守校規，克盡本分"],
     80: [
@@ -559,9 +569,9 @@ const OPENINGS = {
   "人際": {
     60: [
       "你與同學互動仍在學習合作中", "你人際互動偶有摩擦但願意調整", "你與同儕相處尚在磨合", "你經引導後能友善與同學相處", "你對於團體合作正逐步適應中",
-      "你願意嘗試主動與同學互動", "你在小組活動中逐漸敢於表達", "你個性較為靦腆但願意嘗試與人互動", "你個性較為害羞但漸漸願意與同學互動玩樂", "你與同學相處雖話不多但誠懇待人不與人爭",
-      "你待人友善但與同儕互動仍待磨合", "你正努力克服害羞主動向同學釋出善意", "你對於如何化解同儕誤會正在學習當中", "你漸漸學會在團體中找到自己說話的時機", "你雖然不擅言辭但總會用微笑回應同學",
-      "你正學習如何適當地表達自己的情緒與感受", "你在面對同學的邀請時漸漸不再感到退縮", "你正嘗試在分組討論中貢獻自己的一份心力", "你雖然交友圈不大但對朋友十分真誠實在", "你的人際交往技巧在老師的鼓勵下正慢慢萌芽", "你與同學互動雖靦腆但態度友善，願意嘗試"],
+      "你願意嘗試主動與同學互動", "你在小組活動中逐漸敢於表達", "你個性較為靦腆但願意嘗試與人互動", "你個性較為害羞但漸漸願意與同學互動玩樂", "你與同學相處雖話不多，但誠懇待人不與人爭",
+      "你待人友善但與同儕互動仍待磨合", "你努力克服害羞主動向同學釋出善意", "你對於如何化解同儕誤會仍在摸索學習", "你漸漸學會在團體中找到自己說話的時機", "你雖然不擅言辭但總會用微笑回應同學",
+      "你正學習如何適當地表達自己的情緒與感受", "你在面對同學的邀請時漸漸不再感到退縮", "你正嘗試在分組討論中貢獻自己的一份心力", "你雖然交友圈不大，但對朋友十分真誠實在", "你的人際交往技巧在老師的鼓勵下正慢慢萌芽", "你與同學互動雖靦腆但態度友善，願意嘗試"],
     70: [
       "你能與同學和睦相處", "你人際互動穩定樂於參與團體活動", "你與同儕互動良好偶需引導分享", "你能主動修復與同學的小摩擦", "你整體人緣不錯與同學相處融洽",
       "你能主動邀請同學一起參與活動", "你在小組合作中展現耐心", "你坦誠直率願意表達自己的想法與感受", "你平易近人、善解人意，是很好相處的同學", "你待人隨和樂於團結同學、與人為善",
@@ -614,12 +624,12 @@ const OPENINGS = {
     60: [
       "你對於服務工作尚在嘗試階段", "你偶爾需要提醒才會主動幫忙", "你對於分派的任務能配合完成", "你服務態度仍在建立中", "你經鼓勵後願意嘗試協助班務",
       "你對於服務他人這件事還在學習", "你偶爾會忘記份內工作但態度願意配合", "你在老師引導下漸漸願意伸出援手", "你對服務工作漸漸產生興趣", "你面對服務任務偶有猶豫但願意嘗試",
-      "你偶爾熱心但服務他人仍在學習", "你正學習如何在打掃時間確實完成自己的區域", "你對於幫助他人正在克服心中的羞澀與猶豫", "你漸漸了解為班級付出是一件有意義的事情", "你在同學的帶動下開始願意參與小組的服務任務",
-      "你對於值日生的工作正逐步建立起責任感", "你偶爾會主動幫老師跑腿遞送公文或物品", "你正嘗試在別人需要幫助時給予微小的協助", "你在服務的過程中漸漸體會到付出的快樂", "你雖然動作不快但願意腳踏實地完成打掃工作", "你偶爾願意幫忙班務，服務態度正在養成"],
+      "你偶爾熱心但服務他人仍在學習", "你正學習如何在打掃時間確實完成自己的區域", "你對於幫助他人正在克服心中的羞澀與猶豫", "你漸漸了解為班級付出是一件有意義的事情", "你在同學的帶動下，開始願意參與小組的服務任務",
+      "你對於值日生的工作正逐步建立起責任感", "你偶爾會主動幫老師跑腿遞送公文或物品", "你正嘗試在別人需要幫助時給予微小的協助", "你在服務的過程中漸漸體會到付出的快樂", "你雖然動作不快，但願意腳踏實地完成打掃工作", "你偶爾願意幫忙班務，服務態度正在養成"],
     70: [
       "你能配合完成分內的服務工作", "你對於班級服務漸漸展現參與意願", "你服務態度穩定偶爾需要提醒", "你能主動協助簡單的班務工作", "你對於服務他人漸漸養成習慣",
       "你能按時完成被分配的服務任務", "你服務熱忱正逐步展現", "你對於團體服務事務有基本的參與度", "你願意配合同學一起完成服務工作", "你服務態度日漸積極主動",
-      "你樂意助人服務態度逐漸積極", "你總能將自己負責的外掃區域打掃得乾淨整潔", "你擔任各科小老師時能盡到收發作業的基本責任", "你在班級大掃除時能主動留下來幫忙到最後", "你對於維護班級的公共財產與環境有著一份用心",
+      "你樂意助人服務態度逐漸積極", "你總能將自己負責的外掃區域打掃得乾淨整潔", "你擔任小老師時，能盡到收發作業的責任", "你在班級大掃除時能主動留下來幫忙到最後", "你對於維護班級的公共財產與環境有著一份用心",
       "你能主動關心座位周遭的整潔並適時清理", "你懂得在同學忙碌時順手幫忙整理桌面或物品", "你在資源回收與垃圾分類的工作上表現得很確實", "你漸漸成為班上可以依賴的服務小幫手", "你對於服務的認知已經從被動接受轉為主動參與", "你熱心服務，肯做又能做"],
     80: [
       "你服務態度良好樂於協助班務", "你能主動承擔班級服務工作", "你樂於幫助同學解決生活或課業上的困難", "你對於服務工作展現高度用心", "你能確實完成各項服務任務",
@@ -641,7 +651,7 @@ const OPENINGS = {
     60: [
       "你上課專注力仍在建立中", "你容易分心但經提醒能拉回注意力", "你對於長時間專注仍需要練習", "你偶爾恍神但態度願意配合調整", "你在老師引導下漸漸學習專心",
       "你面對枯燥的內容容易分心", "你專注力尚在培養階段", "你經提醒後能重新聚焦於學習", "你對於專注這件事還在摸索方法", "你偶爾會分心但願意嘗試改進",
-      "你偶爾能展現專注神情但仍待穩定", "你正努力抗拒周遭環境對你產生的微小干擾", "你在閱讀長篇文章時正學習如何保持不分神", "你對於老師的講解正嘗試著延長聆聽的時間", "你漸漸懂得在上課時將與學習無關的物品收好",
+      "你偶爾能展現專注神情但仍待穩定", "你同時努力抗拒周遭環境的微小干擾", "你在閱讀長篇文章時正學習如何保持不分神", "你對於老師的講解正嘗試著延長聆聽的時間", "你漸漸懂得在上課時將與學習無關的物品收好",
       "你正學習如何克服容易神遊太虛的小毛病", "你在完成作業時正努力減少東張西望的次數", "你面對需要靜心的任務時正逐步建立起耐心", "你的專注力雖然短暫但已經能看見努力的痕跡", "你在自我提醒下漸漸能找回飄散的注意力", "你上課專注力仍在建立，偶爾容易分心"],
     70: [
       "你專注力大致穩定偶爾需要提醒", "你能維持一段時間的專注學習", "你對於感興趣的內容能專心投入", "你專注力逐漸提升", "你能配合老師的提醒重新專心",
@@ -668,7 +678,7 @@ const OPENINGS = {
 
 const ENDINGS = {
   "品行": {
-    60:["值得肯定。","展現學習動機。","持續進步中。","值得嘉勉。","潛力值得期待。","值得師長讚賞。","逐步展現進步軌跡。"],
+    60:["值得肯定。","展現學習動機。","持續進步中。","值得嘉勉。","潛力值得期待。","值得師長讚賞。","逐步展現出進步軌跡。"],
     70:["值得肯定。","值得放心。","值得嘉許。","逐步邁向成熟。","表現漸入佳境。","值得師長信賴。","展現穩定的自我要求。"],
     80:["值得肯定與讚許。","深獲師長肯定。","堪為同學表率。","令人欣喜。","值得嘉許。","深受同學信賴。","展現高度自我要求。"],
     90:["令人激賞。","堪稱同學典範。","深受肯定。","令人刮目相看。","值得高度肯定。","深受全班敬重。","展現無私的胸懷。"],
@@ -683,7 +693,7 @@ const ENDINGS = {
   },
   "學校": {
     60:["值得嘉許。","值得期待。","漸入佳境。","逐步進步中。","值得鼓舞。","校園適應力逐步提升。","值得師長關注與肯定。"],
-    70:["展現穩定成長。","值得讚許。","態度值得嘉勉。","逐漸養成好習慣。","表現日漸成熟。","值得師長信任。","校園參與度逐步提升。"],
+    70:["展現穩定成長。","值得讚許。","態度值得嘉勉。","逐漸養成好習慣。","表現日漸成熟。","值得師長信任。","校園參與度日益提升。"],
     80:["深受好評。","展現十足用心。","令人欣慰。","值得嘉勉。","堪為榜樣。","深獲全班信賴。","展現高度參與熱忱。"],
     90:["展現過人實力。","令人欽佩。","深具領袖特質。","廣受同儕敬重。","令人激賞不已。","堪稱校園之光。","展現無比的責任擔當。"],
     100:["堪稱最佳典範。","令人拍案叫絕。","展現無比熱忱。","堪為全班表率。","令人肅然起敬。","堪稱杏壇佳話。","展現無庸置疑的卓越。"]
@@ -704,13 +714,13 @@ const ENDINGS = {
   },
   "服務": {
     60:["服務意願逐漸萌芽。","樂於嘗試伸出援手。","態度願意配合值得讚賞。","服務熱忱正逐步累積。","值得師長給予機會鼓勵。","展現初步的服務意願。","潛力可望持續開發。"],
-    70:["服務態度日趨穩定。","樂於配合完成分內工作。","展現逐步累積的服務經驗。","值得肯定的服務表現。","服務參與度逐步提升。","態度務實漸入佳境。","展現穩定的服務動力。"],
+    70:["服務態度日趨穩定。","樂於配合完成分內工作。","展現逐步累積的服務經驗。","值得肯定的服務表現。","服務投入度穩定提升。","態度務實漸入佳境。","展現穩定的服務動力。"],
     80:["服務精神可嘉深獲肯定。","樂於主動承擔班務工作。","展現十足的服務用心。","服務表現穩定令人放心。","值得肯定的服務態度。","深受同學信賴與感謝。","展現高度的服務責任感。"],
     90:["服務熱忱令人感佩。","堪稱服務團隊的中流砥柱。","展現無私奉獻的服務精神。","深受同學倚重與信賴。","服務表現令人激賞不已。","展現卓越的服務領導力。","堪稱服務典範。"],
     100:["服務精神堪稱典範。","展現無私奉獻的大愛精神。","服務表現近乎完美深獲信賴。","始終是師長倚重的服務主力。","服務熱忱感染全班堪稱楷模。","展現卓越的服務領導典範。","樂於奉獻不求回報令人動容。"]
   },
   "專注": {
-    60:["專注力正逐步萌芽。","經提醒能拉回注意力值得肯定。","專心程度逐漸提升。","定力值得肯定與鼓勵。","展現初步的專注意願。","潛力可望逐步養成。","專注習慣正逐步累積。"],
+    60:["專注力逐步萌芽。","經提醒能拉回注意力值得肯定。","專心程度逐漸提升。","定力值得肯定與鼓勵。","展現初步的專注意願。","潛力可望逐步養成。","專注習慣逐步累積。"],
     70:["專注力日趨穩定。","能維持專心值得肯定。","展現逐步累積的專注經驗。","值得肯定的專注表現。","專注度逐步提升。","態度沉穩漸入佳境。","展現穩定的專注動力。"],
     80:["專注力表現良好值得肯定。","能主動維持專心令人欣慰。","展現十足的專注用心。","專注表現穩定令人放心。","值得肯定的專注態度。","深受肯定與讚賞。","展現高度的專注責任感。"],
     90:["專注力優異令人感佩。","堪稱專注力的最佳典範。","展現超凡的專注力與定力。","深受師長肯定與讚賞。","專注表現令人刮目相看。","展現卓越的專注實力。","堪稱專注學習的典範。"],
@@ -737,6 +747,7 @@ const results = document.getElementById('results');
 catRow.addEventListener('click', e=>{
   const btn = e.target.closest('.chip');
   if(!btn) return;
+  if(btn.classList.contains('used')) return; // 已加入評語框的項目,不可重複選取
   const cat = btn.dataset.cat;
   if(selectedCats.has(cat)){
     selectedCats.delete(cat);
@@ -758,15 +769,25 @@ stageRow.addEventListener('click', e=>{
 });
 
 function updateHint(){
+  const addedCount = results.querySelectorAll('.entry').length;
+  const addedNote = addedCount > 0 ? `(目前評語框內已有 ${addedCount} 項)` : '';
   if(selectedCats.size===0 && !selectedScore){
-    hint.textContent = "請先選擇項目與成長階段";
+    hint.textContent = addedCount > 0
+      ? `請繼續選擇要加入的項目與成長階段 ${addedNote}`
+      : "請先選擇項目與成長階段";
   } else if(selectedCats.size===0){
-    hint.textContent = "還沒選擇項目喔(可複選) 🌟";
+    hint.textContent = `還沒選擇項目喔(可複選) 🌟 ${addedNote}`;
   } else if(!selectedScore){
-    hint.textContent = "還沒選擇成長階段喔";
+    hint.textContent = `還沒選擇成長階段喔 ${addedNote}`;
   } else {
-    hint.textContent = `已選擇 ${selectedCats.size} 個項目 · 成長階段 ${selectedScore}`;
+    hint.textContent = `已選擇 ${selectedCats.size} 個項目 · 成長階段 ${selectedScore} ${addedNote}`;
   }
+}
+
+function updateGenBtnLabel(){
+  const genBtn = document.getElementById('genBtn');
+  const hasEntries = results.querySelector('.entry');
+  genBtn.textContent = hasEntries ? '➕ 加入評語' : '✨ 產生評語';
 }
 
 // 連接詞:讓開頭句與結尾句之間的銜接方式更多元
@@ -798,13 +819,13 @@ function pickComment(cat, score, avoidKey){
   return {text, idx:key};
 }
 
-function buildEntry(cat){
-  const {text, idx} = pickComment(cat, selectedScore, null);
+function buildEntry(cat, score){
+  const {text, idx} = pickComment(cat, score, null);
   lastIndex[cat] = idx;
   const color = CAT_COLOR[cat];
   return `
-    <div class="entry" data-cat="${cat}">
-      <div class="entry-head"><span class="dot" style="background:${color};"></span>${CAT_EMOJI[cat]} ${cat}</div>
+    <div class="entry" data-cat="${cat}" data-score="${score}">
+      <div class="entry-head"><span class="dot" style="background:${color};"></span>${CAT_EMOJI[cat]} ${cat} · ${score}分</div>
       <p class="comment-text">${text}</p>
       <div class="card-actions">
         <button class="mini-btn reroll-btn">🎲 換一句</button>
@@ -813,37 +834,54 @@ function buildEntry(cat){
   `;
 }
 
-function renderMegaCard(){
-  const catList = [...selectedCats];
-  const titleText = catList.length > 1
-    ? `📝 評語組合 · ${selectedScore}分`
-    : `📝 ${catList[0]}評語 · ${selectedScore}分`;
-
-  const mergeUI = catList.length >= 2 ? `
-    <div class="merge-block" style="display:none;">
-      <div class="merge-label">🔗 整合評語</div>
-      <p class="merge-text"></p>
-      <div class="card-actions">
-        <button class="mini-btn copy-merge-btn">📋 複製整合評語</button>
-      </div>
-    </div>
-    <button class="mini-btn merge-btn">🔗 一鍵整合評語</button>
-  ` : '';
-
-  const card = document.createElement('div');
+// 取得(或第一次建立)評語卡片:讓不同步驟、不同成長階段選擇的項目都能加入同一張卡片
+function ensureCard(){
+  let card = results.querySelector('.result-card');
+  if(card) return card;
+  card = document.createElement('div');
   card.className = 'result-card';
   card.innerHTML = `
-    <div class="tape">${titleText}</div>
+    <div class="tape">📝 評語組合</div>
     <div class="body">
-      ${catList.map(buildEntry).join('')}
+      <div class="entries-wrap"></div>
       <div class="card-footer">
         <button class="mini-btn rerollall-btn">🔄 一鍵更換評語</button>
-        ${mergeUI}
+        <div class="merge-block" style="display:none;">
+          <div class="merge-label">🔗 整合評語</div>
+          <p class="merge-text"></p>
+          <div class="card-actions">
+            <button class="mini-btn copy-merge-btn">📋 複製整合評語</button>
+          </div>
+        </div>
+        <button class="mini-btn merge-btn" style="display:none;">🔗 一鍵整合評語</button>
         <button class="mini-btn copy-all-btn">📋 複製全部評語</button>
+        <button class="mini-btn reset-btn">🗑️ 清空重新開始</button>
       </div>
     </div>
   `;
+  results.appendChild(card);
   return card;
+}
+
+// 更新卡片頂端標題:如果目前所有項目都是同一個成長階段,就顯示該分數,否則只顯示「評語組合」
+function updateCardTitle(card){
+  const scores = [...new Set([...card.querySelectorAll('.entry')].map(el=>el.dataset.score))];
+  card.querySelector('.tape').textContent = scores.length === 1 ? `📝 評語組合 · ${scores[0]}分` : '📝 評語組合';
+}
+
+// 把新選擇的項目(可能是不同成長階段)加入到現有的評語卡片中,不會清掉先前已加入的項目
+function addEntries(cats, score){
+  const card = ensureCard();
+  const wrap = card.querySelector('.entries-wrap');
+  cats.forEach(cat=>{
+    wrap.insertAdjacentHTML('beforeend', buildEntry(cat, score));
+  });
+  updateCardTitle(card);
+  const total = card.querySelectorAll('.entry').length;
+  const mergeBtn = card.querySelector('.merge-btn');
+  if(total >= 2) mergeBtn.style.display = '';
+  const block = card.querySelector('.merge-block');
+  block.style.display = 'none'; // 內容有異動,先前整合過的結果先隱藏,避免顯示過期內容
 }
 
 document.getElementById('genBtn').addEventListener('click', ()=>{
@@ -853,9 +891,27 @@ document.getElementById('genBtn').addEventListener('click', ()=>{
     setTimeout(()=>{hint.style.color='';}, 900);
     return;
   }
-  results.innerHTML = '';
-  lastIndex = {};
-  results.appendChild(renderMegaCard());
+  const existingCats = new Set([...results.querySelectorAll('.entry')].map(el=>el.dataset.cat));
+  const catsToAdd = [...selectedCats].filter(c=>!existingCats.has(c));
+  const skipped = [...selectedCats].filter(c=>existingCats.has(c));
+
+  if(catsToAdd.length === 0){
+    showToast('這些項目已經加入過囉 ⚠️');
+    return;
+  }
+  addEntries(catsToAdd, selectedScore);
+  if(skipped.length){
+    showToast(`${skipped.join('、')} 已加入過,已略過 ⚠️`);
+  }
+
+  catsToAdd.forEach(c=>{
+    selectedCats.delete(c);
+    const chip = catRow.querySelector(`.chip[data-cat="${c}"]`);
+    if(chip){ chip.classList.remove('active'); chip.classList.add('used'); }
+  });
+
+  updateHint();
+  updateGenBtnLabel();
 });
 
 function mergeComments(){
@@ -949,7 +1005,8 @@ results.addEventListener('click', e=>{
 
   if(entry && e.target.closest('.reroll-btn')){
     const cat = entry.dataset.cat;
-    const {text, idx} = pickComment(cat, selectedScore, lastIndex[cat]);
+    const score = entry.dataset.score;
+    const {text, idx} = pickComment(cat, score, lastIndex[cat]);
     lastIndex[cat] = idx;
     entry.querySelector('.comment-text').textContent = text;
     const block = results.querySelector('.merge-block');
@@ -960,12 +1017,24 @@ results.addEventListener('click', e=>{
     const allEntries = [...results.querySelectorAll('.entry')];
     allEntries.forEach(el=>{
       const cat = el.dataset.cat;
-      const {text, idx} = pickComment(cat, selectedScore, lastIndex[cat]);
+      const score = el.dataset.score;
+      const {text, idx} = pickComment(cat, score, lastIndex[cat]);
       lastIndex[cat] = idx;
       el.querySelector('.comment-text').textContent = text;
     });
     const block = results.querySelector('.merge-block');
     if(block) block.style.display = 'none';
+  }
+
+  if(e.target.closest('.reset-btn')){
+    results.innerHTML = '';
+    lastIndex = {};
+    selectedCats.clear();
+    selectedScore = null;
+    catRow.querySelectorAll('.chip').forEach(c=>c.classList.remove('active','used'));
+    stageRow.querySelectorAll('.stage').forEach(s=>s.classList.remove('active'));
+    updateHint();
+    updateGenBtnLabel();
   }
 
   if(e.target.closest('.merge-btn')){
@@ -1032,6 +1101,7 @@ function applyAutoScale(){
 }
 window.addEventListener('resize', applyAutoScale);
 applyAutoScale();
+updateGenBtnLabel();
 </script>
 </body>
 </html>
