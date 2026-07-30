@@ -130,7 +130,16 @@
   .chip[data-cat="專注"]{background:var(--c-zhuanzhu);}
   .chip[data-cat="才藝"]{background:var(--c-caiyi);}
 
-  .persona-panel{margin-top:0;}
+  .persona-panel{margin-top:40px;position:relative;}
+  .persona-panel::before{
+    content:"";
+    position:absolute;
+    top:-24px;left:50%;
+    transform:translateX(-50%);
+    width:80%;
+    max-width:300px;
+    border-top:2px dashed #5A4A3C;
+  }
   .persona-desc{color:#C2A67E;font-size:13px;margin:-6px 0 16px;line-height:1.6;}
   .chip[data-p="內向細心"]{background:#3F7D6E;}
   .chip[data-p="熱情活潑"]{background:#D9622B;}
