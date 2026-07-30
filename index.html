@@ -16,6 +16,7 @@
     --c-xueye:#5B31C4;
     --c-fuwu:#B5451E;
     --c-zhuanzhu:#A98A1A;
+    --c-caiyi:#1E7D6F;
     --s60:#2F6B3E;
     --s70:#1E7A6E;
     --s80:#7A1F3D;
@@ -117,6 +118,9 @@
   .chip.active{opacity:1;transform:scale(1.04) rotate(-1deg);box-shadow:0 5px 0 rgba(0,0,0,0.15);}
   .chip.used{opacity:0.3;filter:grayscale(55%);cursor:not-allowed;transform:scale(0.95);}
   .chip.used:hover{opacity:0.3;}
+  /* 項目選擇區(第一步)有8個按鈕,縮小尺寸與間距讓網頁版能維持同一行不換行 */
+  #catRow{gap:8px;}
+  #catRow .chip{padding:11px 15px;font-size:15px;gap:4px;}
   .chip[data-cat="品行"]{background:var(--c-pinxing);}
   .chip[data-cat="生活"]{background:var(--c-shenghuo);}
   .chip[data-cat="學校"]{background:var(--c-xuexiao);}
@@ -124,6 +128,17 @@
   .chip[data-cat="學業"]{background:var(--c-xueye);}
   .chip[data-cat="服務"]{background:var(--c-fuwu);}
   .chip[data-cat="專注"]{background:var(--c-zhuanzhu);}
+  .chip[data-cat="才藝"]{background:var(--c-caiyi);}
+
+  .persona-panel{margin-top:0;}
+  .persona-desc{color:#C2A67E;font-size:13px;margin:-6px 0 16px;line-height:1.6;}
+  .chip[data-p="內向細心"]{background:#3F7D6E;}
+  .chip[data-p="熱情活潑"]{background:#D9622B;}
+  .chip[data-p="自律用心"]{background:#4A5FAE;}
+  .chip[data-p="機靈敏捷"]{background:#B8892B;}
+  .chip[data-p="溫和隨和"]{background:#8B6BAE;}
+  #personaResults{margin-top:18px;}
+  #personaResults .result-card{margin-bottom:0;}
 
   .stage-row{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;}
   .stage{
@@ -318,6 +333,14 @@
       border-radius:16px;
       gap:10px;
     }
+    /* 因為網頁版用了#catRow這個ID選擇器來縮小按鈕,優先權較高,手機版這裡要用同樣ID再覆寫回來,否則手機版也會被強制縮小 */
+    #catRow{gap:10px;}
+    #catRow .chip{
+      width:100%;
+      padding:14px 18px;
+      font-size:16px;
+      gap:10px;
+    }
     .chip .icon-badge{
       display:inline-flex;align-items:center;justify-content:center;
       width:30px;height:30px;border-radius:50%;
@@ -360,6 +383,12 @@
       width:100%;
       padding:13px 12px;
       font-size:15px;
+    }
+    /* 性格類型卡片的「換一句」「複製」按鈕維持小尺寸並排,不套用上面滿版寬度的規則 */
+    .persona-reroll-btn, .persona-copy-btn{
+      width:auto;
+      padding:10px 18px;
+      font-size:14px;
     }
 
     /* 整合評語區塊:字級縮小、改成一般斷行+齊行,避免手機上跑版或字太大擠不下 */
@@ -452,6 +481,7 @@
       <button class="chip" data-cat="學校"><span class="icon-badge">🏫</span> 學校</button>
       <button class="chip" data-cat="服務"><span class="icon-badge">🤲</span> 服務</button>
       <button class="chip" data-cat="專注"><span class="icon-badge">🎯</span> 專注</button>
+      <button class="chip" data-cat="才藝"><span class="icon-badge">🎨</span> 才藝</button>
       <button class="chip" data-cat="學業"><span class="icon-badge">📚</span> 學業</button>
     </div>
   </div>
@@ -473,6 +503,19 @@
   </div>
 
   <div id="results"></div>
+
+  <div class="panel persona-panel">
+    <h2><span class="badge-step">✨</span>性格類型速寫評語<span class="unibreak">(選填加分)</span></h2>
+    <p class="persona-desc">依孩子的性格特質,快速產生一段「讚美＋引導＋期待」的評語,可作為整段評語的開場或補充喔！</p>
+    <div class="chip-row" id="personaRow">
+      <button class="chip persona-chip" data-p="內向細心"><span class="icon-badge">🌱</span> 內向細心</button>
+      <button class="chip persona-chip" data-p="熱情活潑"><span class="icon-badge">🔥</span> 熱情活潑</button>
+      <button class="chip persona-chip" data-p="自律用心"><span class="icon-badge">📘</span> 自律用心</button>
+      <button class="chip persona-chip" data-p="機靈敏捷"><span class="icon-badge">💡</span> 機靈敏捷</button>
+      <button class="chip persona-chip" data-p="溫和隨和"><span class="icon-badge">🌤️</span> 溫和隨和</button>
+    </div>
+    <div id="personaResults"></div>
+  </div>
 
   <footer>
     這是一個<b>單一 HTML 檔案</b>,不需安裝、不需連網。<br>
@@ -676,6 +719,28 @@ const OPENINGS = {
       "你專注投入的態度令人由衷敬佩", "你專注力表現卓越堪為全班表率", "你無論任務多困難都能全神貫注", "你展現頂尖的專注力與毅力", "你專注力與耐心兼具堪稱學習典範",
       "你專注神情堅定展現高度求知熱忱", "你專注力表現穩定幾乎不受外界干擾", "你面對外界干擾仍能沉穩維持專注", "你在任何環境下都能瞬間鎖定目標並維持完美的專心", "你專注投入的神情令人印象深刻",
       "你意志力堅定專注力表現十分出色", "你專注力與毅力兼具表現十分突出", "你專注力表現堪為同學學習的榜樣", "你專注力表現亮眼深受師生肯定", "你專注力表現名列前茅深受肯定", "你動靜皆宜，專注力極佳，做事不疾不徐，堪稱典範"]
+  },
+  "才藝": {
+    60: [
+      "你對於畫畫、勞作等藝能活動展現初步的興趣", "你在體育活動中願意嘗試各種動作但仍在摸索", "你對音樂的節奏感正逐步培養中", "你偶爾能在表演活動中鼓起勇氣展現自己",
+      "你對於動手操作的課程展現好奇心", "你的想像力正逐漸萌芽仍需多方嘗試", "你對資訊科技的操作還在熟悉階段", "你面對藝能課程的挑戰願意勇敢嘗試",
+      "你對於美術與勞作的基本技巧仍在練習中", "你在運動項目中的基本動作正逐步建立", "你對於團體表演活動仍在適應但態度積極", "你開始對不同的藝能領域展現探索的興趣"],
+    70: [
+      "你對藝能科目的學習態度日趨積極", "你的手作與勞作能力逐漸展現進步", "你在體育活動中的協調性穩步提升", "你對音樂與節奏的掌握度漸入佳境",
+      "你能主動參與課外的藝能探索活動", "你的創作想法愈來愈豐富多元", "你對資訊工具的運用日漸熟練", "你的表演台風逐漸展現自信",
+      "你的運動技巧透過練習穩定進步", "你對美感的掌握逐漸展現個人特色", "你能主動嘗試不同類型的才藝活動", "你的手眼協調能力持續在進步中"],
+    80: [
+      "你的繪畫創作力豐富，作品色彩鮮豔且富含想像力", "你體育細胞發達，在運動場上表現亮眼且充滿活力", "你的音樂感受力佳，節奏感與音準皆有優異表現", "你表演大方自然，具備良好的舞台魅力與表達力",
+      "你動手做能力強，在創客與勞作課程中表現出眾", "你觀察力敏銳，能注意到生活中許多細微美麗的景象", "你具有豐富的想像力，常能編織出令人驚喜的故事", "你資訊操作能力佳，能靈活運用數位工具進行學習",
+      "你的手作品總能兼具創意與美感", "你在體育競賽中展現不錯的實力與衝勁", "你能將創意融入日常作業之中，成果令人耳目一新", "你對藝能領域的學習充滿主動探索的熱忱"],
+    90: [
+      "你在藝能科目的學習上充滿熱忱，成果總是令人讚賞", "你具備優異的審美觀，作品個人風格鮮明且精緻", "你運動神經發達，能帶領團隊在體育競賽中獲得佳績", "你邏輯推理能力強，在棋藝與益智遊戲中表現傑出",
+      "你能將生活體驗融入創作中，展現獨特的藝術天賦", "你歌聲甜美朗朗上口，能帶給周遭同學無限歡樂", "你手藝精細，完成的各種作品細節處理得十分到位", "你具備良好的身體協調性，舞蹈與律動表現相當出色",
+      "你在多項藝能領域都展現超齡的成熟度與實力", "你的創作常能跳脫框架帶來令人驚艷的視角", "你對美感與節奏的掌握已達到相當專業的水準", "你的表演與創作總能贏得師生一致的讚賞"],
+    100: [
+      "你課外興趣廣泛，能主動探索不同領域的藝能新知並融會貫通", "你在藝能各領域皆展現全方位的傑出才華", "你的創作總能展現獨一無二的個人風格與深度", "你在各項藝能競賽中屢創佳績堪為班級之光",
+      "你身兼多項才藝且皆能達到頂尖水準", "你對美感與藝術的鑑賞力遠超同齡孩子", "你的表演與創作總能為全班帶來驚喜與感動", "你的才華洋溢且謙虛好學堪為同儕典範",
+      "你在藝能領域的成就足以成為全校學習的標竿", "你將天賦與努力完美結合成就非凡的藝能表現", "你的每一件作品都展現出職業級的細膩與用心", "你堪稱學校裡多才多藝的代表人物"]
   }
 };
 
@@ -728,24 +793,68 @@ const ENDINGS = {
     80:["專注力表現良好值得肯定。","能主動維持專心令人欣慰。","展現十足的專注用心。","專注表現穩定令人放心。","值得肯定的專注態度。","深受肯定與讚賞。","展現高度的專注責任感。"],
     90:["專注力優異令人感佩。","堪稱專注力的最佳典範。","展現超凡的專注力與定力。","深受師長肯定與讚賞。","專注表現令人刮目相看。","展現卓越的專注實力。","堪稱專注學習的典範。"],
     100:["專注力堪稱典範。","展現無可挑剔的專注力。","專注力近乎完美不受任何干擾。","始終維持極致專注堪稱楷模。","展現超凡的定力與意志力。","專注投入的態度令人由衷欽佩。","展現頂尖的專注力與毅力。"]
+  },
+  "才藝": {
+    60:["潛力值得期待。","展現初步的藝能天賦。","值得鼓勵與肯定。","才華正逐步萌芽。","展現學習的好奇心。","值得師長給予機會鼓勵。","展現初步的創作意願。"],
+    70:["表現逐步累積進步。","值得肯定的學習態度。","展現穩定的藝能潛力。","才華日漸展露。","期待持續保持這份熱忱。","展現逐步累積的自信。","值得肯定與鼓勵。"],
+    80:["表現令人驚艷。","展現獨一無二的藝術天賦。","值得高度肯定。","才華備受矚目。","期待你繼續發光發熱。","展現十足的藝能潛力。","深受師生讚賞。"],
+    90:["表現令人讚賞不已。","堪稱班上的藝能之星。","展現卓越出眾的才華。","深受同學欽佩。","期待未來持續綻放光芒。","展現令人激賞的藝術涵養。","才華表現令人刮目相看。"],
+    100:["表現近乎完美堪稱典範。","堪稱全方位的藝能楷模。","才華洋溢令人由衷欽佩。","展現無可挑剔的專業水準。","足以成為大家學習的典範。","堪稱藝能領域的最佳示範。","展現令人讚嘆的頂尖才華。"]
   }
 };
 
 const CAT_COLOR = {
-  "品行":"#FF6FA0","生活":"#3FB8AC","學校":"#5B8DEF","人際":"#FFAA3D","學業":"#9B7EDE","服務":"#F0654F","專注":"#F0B429"
+  "品行":"#FF6FA0","生活":"#3FB8AC","學校":"#5B8DEF","人際":"#FFAA3D","學業":"#9B7EDE","服務":"#F0654F","專注":"#F0B429","才藝":"#2E9E8F"
 };
 const CAT_EMOJI = {
-  "品行":"🌟","生活":"🏡","學校":"🏫","人際":"🤝","學業":"📚","服務":"🤲","專注":"🎯"
+  "品行":"🌟","生活":"🏡","學校":"🏫","人際":"🤝","學業":"📚","服務":"🤲","專注":"🎯","才藝":"🎨"
+};
+
+// 性格類型速寫評語:採「讚美＋引導＋期待」三明治公式,三個部分各自有多種寫法,隨機組合並避免撞字
+const PERSONA = {
+  "內向細心":{
+    emoji:"🌱",
+    praise:["學習態度沉穩,做事細心有條理,是位默默努力的好孩子","個性溫和害羞,待人親切有禮,是同學眼中安靜可靠的夥伴","上課雖然話不多,卻總是專注聆聽、認真思考","做事一板一眼,交代的任務總能仔細完成,讓人很放心","觀察力細膩,總能注意到別人容易忽略的小細節","個性文靜乖巧,雖然不常主動說話,但相處起來十分溫暖","對待每一項作業都相當用心,字跡工整,態度一絲不苟"],
+    guide:["若能多給自己一點信心,勇敢說出心裡的想法","若能試著跨出舒適圈,多主動與同學互動","若能練習在小組討論中先開口分享一句","若能練習在遇到困難時主動開口求助","若能試著把心裡的想法寫下來,再慢慢練習說出口","若能在下課時多找一兩位同學聊聊天","若能練習舉手發表,哪怕只是簡短的一句話"],
+    expect:["相信大家會更看見你豐富的內心世界！","相信你獨特的亮點會被更多人看見！","相信你會發現自己其實比想像中更有自信！","相信你會慢慢找到屬於自己的舞台！","相信你的用心會被更多人看見與珍惜！","相信你會愈來愈勇敢、愈來愈自在！","相信你的細膩會成為最珍貴的特質！"]
+  },
+  "熱情活潑":{
+    emoji:"🔥",
+    praise:["性格開朗活潑,對新事物總是充滿好奇與熱情","熱心公益、樂於助人,擔任幹部時總是全力以赴","精力充沛、行動力十足,是班上的活力來源","笑容燦爛、感染力十足,總能為班上帶來歡樂的氣氛","對體育與藝能活動充滿熱忱,總是全力以赴、樂在其中","個性大方外向,交朋友的能力很強,人緣相當不錯","勇於嘗試新事物,面對挑戰總是躍躍欲試"],
+    guide:["若能將這份熱情延續到課堂專注力上,減少隨意交談","若在遇到挫折或意見不合時,先停一下、深呼吸","若能練習在行動前先想一想後果","若能練習在別人說話時耐心聽完再回應","若能在完成任務前先靜下心規劃一下步驟","若能練習把充沛的精力用在對的時間點上","若能試著放慢腳步,把手邊的事情做得更仔細"],
+    expect:["學習表現一定會更上一層樓！","相信會成為更有號召力的小領袖！","相信你會展現更成熟穩重的一面！","相信你會成為兼具熱情與穩重的孩子！","相信你會用這份活力感染更多人向上！","相信你會愈來愈懂得拿捏分寸！","未來的你一定會發光發熱！"]
+  },
+  "自律用心":{
+    emoji:"📘",
+    praise:["學習態度嚴謹認真,各科表現皆十分亮眼,是同學學習的好榜樣","做事負責任、標準要求高,成果總是令人讚賞","反應敏捷、思路清晰,面對任務總是全力以赴","自我要求極高,對於學習始終保持高度的專注與熱忱","做事一絲不苟,總能把每項任務都完成得盡善盡美","責任感十足,交辦的事情總能準時、確實地完成","思考縝密、邏輯清楚,面對難題總能冷靜分析"],
+    guide:["期許你能保持一顆平常心,享受學習過程中的樂趣","希望你能明白「犯錯也是學習的一部分」,多給自己一點空間","若能練習放下對完美的堅持,適度地放鬆自己","若能練習偶爾放慢腳步,欣賞自己努力的過程","若能試著接受不完美,也是成長的一部分","若能學習在犯錯時給自己多一點寬容","若能練習適度地休息,才能走得更長遠"],
+    expect:["會發現學習其實可以更自在！","相信你會帶著更多自信與從容面對挑戰！","未來的你會走得更長遠、更快樂！","相信你會活得更輕鬆自在！","相信你會發現原來自己已經很棒了！","未來的你一定會走得更穩健、更快樂！","相信你會用更從容的態度面對每個挑戰！"]
+  },
+  "機靈敏捷":{
+    emoji:"💡",
+    praise:["頭腦靈活、反應快速,對新知識的吸收力極佳","點子多、富有創造力,常能提出令人驚艷的想法","學習天賦佳,總能快速掌握課堂重點","領悟力強,老師稍微點一下就能舉一反三","思維敏捷,總能用與眾不同的角度看待問題","對新事物學習速度快,總能很快上手","反應快、聯想力佳,常能在課堂上提出有趣的見解"],
+    guide:["若能再培養一點耐心,把作業和考卷多檢查一遍","若能在遇到困難題目時多堅持一下","若能將三分鐘熱度化為持之以恆的動力","若能練習把想法落實成具體的行動","若能在完成作業後多花一點時間覆核","若能試著把興趣延伸成長期投入的專長","若能練習在遇到瓶頸時不輕易放棄"],
+    expect:["表現一定會更加完美出色！","未來的潛力真的不可限量！","相信你會走得更穩、更遠！","相信你的天賦會發揮得淋漓盡致！","相信你會成為又聰明又踏實的孩子！","未來的你一定能走得又快又穩！","相信你會把聰明才智用在對的地方！"]
+  },
+  "溫和隨和":{
+    emoji:"🌤️",
+    praise:["個性隨和善良,與同學相處融洽,是團體中令人安心的存在","脾氣好、不與人計較,總是默默完成該做的事","遵守秩序、做事踏實,能按時完成老師交代的任務","待人寬厚有禮,從不與同學起爭執,深受大家喜愛","個性樸實穩重,對人對事都抱持著溫和的態度","做事按部就班,雖然不搶第一,但總能穩穩完成","與人相處總是笑臉迎人,是班上氣氛的潤滑劑"],
+    guide:["學習上若能再主動一些,遇到不懂的地方積極發問","若能試著為自己設定一個小目標,主動挑戰更高的難度","若能把這份沉穩化為主動探索的動力","若能試著多表達自己的想法與意見","若能練習主動爭取自己想做的事情","若能為自己多設立一些努力的方向","若能試著在團體活動中更積極一點"],
+    expect:["學習成效一定會顯著提升！","相信你會發現自己其實擁有無限可能！","相信你會活出更精彩、更主動的自己！","相信你會活出更主動、更精彩的自己！","相信你會發現自己其實擁有更多潛力！","未來的你一定會更有自信、更閃耀！","相信你會勇敢地走出屬於自己的路！"]
+  }
 };
 
 let selectedCats = new Set();
 let selectedScore = null;
 let lastIndex = {}; // cat -> index used, to avoid immediate repeat on reroll
+let lastPersonaIndex = {}; // 性格類型 -> 上次組合索引,用於換一句時避免重複
 
 const catRow = document.getElementById('catRow');
 const stageRow = document.getElementById('stageRow');
 const hint = document.getElementById('hint');
 const results = document.getElementById('results');
+const personaRow = document.getElementById('personaRow');
+const personaResults = document.getElementById('personaResults');
 
 catRow.addEventListener('click', e=>{
   const btn = e.target.closest('.chip');
@@ -769,6 +878,32 @@ stageRow.addEventListener('click', e=>{
   btn.classList.add('active');
   selectedScore = btn.dataset.score;
   updateHint();
+});
+
+// 性格類型速寫評語:單選,點選後立即產生一段評語卡片(可再點其他類型切換,也可換一句)
+personaRow.addEventListener('click', e=>{
+  const btn = e.target.closest('.persona-chip');
+  if(!btn) return;
+  const type = btn.dataset.p;
+  personaRow.querySelectorAll('.persona-chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  personaResults.innerHTML = buildPersonaCard(type);
+});
+
+personaResults.addEventListener('click', e=>{
+  const card = e.target.closest('.result-card');
+  if(!card) return;
+  const type = card.dataset.p;
+
+  if(e.target.closest('.persona-reroll-btn')){
+    const {text, idx} = pickPersona(type, lastPersonaIndex[type]);
+    lastPersonaIndex[type] = idx;
+    card.querySelector('.persona-text').textContent = text;
+  }
+
+  if(e.target.closest('.persona-copy-btn')){
+    copyText(card.querySelector('.persona-text').textContent);
+  }
 });
 
 function updateHint(){
@@ -808,20 +943,64 @@ function getPrefixInfo(){
   return {text:PREFIXES[prefIdx], key:`p${prefIdx}`};
 }
 
+// 檢查兩段文字是否有連續3個字以上重複,用來避免開頭句與結尾句撞字(例如「伸出援手」同時出現在兩邊)
+function textOverlaps(a, b){
+  const n = 3;
+  for(let i=0;i<=a.length-n;i++){
+    if(b.includes(a.substr(i,n))) return true;
+  }
+  return false;
+}
+
 function pickComment(cat, score, avoidKey){
   const opens = OPENINGS[cat][score];
   const ends = ENDINGS[cat][score];
-  let key, text;
+  let key, text, openIdx, endIdx, connIdx, prefix, tries = 0;
   do{
-    const openIdx = Math.floor(Math.random()*opens.length);
-    const endIdx = Math.floor(Math.random()*ends.length);
-    const connIdx = Math.floor(Math.random()*CONNECTORS.length);
-    const prefix = getPrefixInfo();
+    openIdx = Math.floor(Math.random()*opens.length);
+    endIdx = Math.floor(Math.random()*ends.length);
+    connIdx = Math.floor(Math.random()*CONNECTORS.length);
+    prefix = getPrefixInfo();
     key = `${openIdx}-${endIdx}-${connIdx}-${prefix.key}`;
     text = prefix.text + opens[openIdx] + CONNECTORS[connIdx] + ends[endIdx];
-  } while(key === avoidKey);
+    tries++;
+  } while((key === avoidKey || textOverlaps(opens[openIdx], ends[endIdx])) && tries < 30);
   return {text, idx:key};
 }
+
+// 性格類型評語:從讚美/引導/期待三個語句庫各挑一句組合,並避免任兩段撞字
+function pickPersona(type, avoidKey){
+  const p = PERSONA[type];
+  let key, text, pIdx, gIdx, eIdx, tries = 0;
+  do{
+    pIdx = Math.floor(Math.random()*p.praise.length);
+    gIdx = Math.floor(Math.random()*p.guide.length);
+    eIdx = Math.floor(Math.random()*p.expect.length);
+    key = `${pIdx}-${gIdx}-${eIdx}`;
+    text = `${p.praise[pIdx]},${p.guide[gIdx]},${p.expect[eIdx]}`;
+    tries++;
+  } while((key === avoidKey || textOverlaps(p.praise[pIdx], p.guide[gIdx]) || textOverlaps(p.guide[gIdx], p.expect[eIdx])) && tries < 30);
+  return {text, idx:key};
+}
+
+function buildPersonaCard(type){
+  const {text, idx} = pickPersona(type, null);
+  lastPersonaIndex[type] = idx;
+  const p = PERSONA[type];
+  return `
+    <div class="result-card" data-p="${type}">
+      <div class="tape">${p.emoji} ${type} · 性格速寫評語</div>
+      <div class="body">
+        <p class="comment-text persona-text">${text}</p>
+        <div class="card-actions">
+          <button class="mini-btn persona-reroll-btn">🎲 換一句</button>
+          <button class="mini-btn copy-all-btn persona-copy-btn">📋 複製</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 
 function buildEntry(cat, score){
   const {text, idx} = pickComment(cat, score, null);
