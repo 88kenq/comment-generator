@@ -149,6 +149,58 @@
   #personaResults{margin-top:18px;}
   #personaResults .result-card{margin-bottom:0;}
 
+  .rating-panel{margin-top:40px;position:relative;}
+  .rating-panel::before{
+    content:"";
+    position:absolute;
+    top:-24px;left:50%;
+    transform:translateX(-50%);
+    width:80%;
+    max-width:300px;
+    border-top:2px dashed #5A4A3C;
+  }
+  .rating-desc{color:#C2A67E;font-size:13px;margin:-6px 0 16px;line-height:1.6;}
+  .rating-global{
+    text-align:center;
+    font-size:16px;
+    font-weight:800;
+    color:#FFD98E;
+    background:rgba(255,217,142,0.08);
+    border:1px dashed rgba(255,217,142,0.4);
+    border-radius:14px;
+    padding:12px 10px;
+    margin-bottom:18px;
+  }
+  .rating-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+  .rate-btn{
+    border:none;cursor:pointer;
+    width:44px;height:44px;
+    border-radius:50%;
+    background:#2A2224;
+    color:#D9C6A8;
+    font-weight:800;font-size:16px;
+    opacity:0.6;
+    transition:all .15s ease;
+    box-shadow:0 3px 0 rgba(0,0,0,0.25);
+  }
+  .rate-btn:hover{opacity:0.9;}
+  .rate-btn.active{
+    opacity:1;
+    background:linear-gradient(135deg,#FF8FB0,#FFB25E);
+    color:#fff;
+    transform:scale(1.12);
+    box-shadow:0 4px 0 rgba(0,0,0,0.3);
+  }
+  .rating-display{
+    margin-top:18px;
+    text-align:center;
+    font-size:17px;
+    font-weight:800;
+    color:#D9C6A8;
+    min-height:26px;
+    transition:all .2s ease;
+  }
+
   .stage-row{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;}
   .stage{
     border:none;cursor:pointer;
@@ -357,6 +409,9 @@
       font-size:16px;flex-shrink:0;
     }
 
+    /* 評分按鈕:手機版縮小尺寸,10顆自然換成兩排 */
+    .rate-btn{width:38px;height:38px;font-size:15px;}
+
     /* 選擇成長階段:改成單排五欄的精簡版,拿掉容易換行的長文字說明 */
     .panel h2{flex-wrap:wrap;}
     .unibreak{flex-basis:100%;margin-top:2px;font-size:13px;}
@@ -524,6 +579,25 @@
       <button class="chip persona-chip" data-p="溫和隨和"><span class="icon-badge">🌤️</span> 溫和隨和</button>
     </div>
     <div id="personaResults"></div>
+  </div>
+
+  <div class="panel rating-panel">
+    <h2><span class="badge-step">💬</span>幫這個小幫手評分</h2>
+    <p class="rating-desc">用起來還喜歡嗎？幫忙評個分,讓我知道還可以怎麼進步！(這一項需要連網才能看到大家的平均分數,其餘功能不受影響)</p>
+    <div id="ratingGlobalDisplay" class="rating-global">讀取中...</div>
+    <div class="rating-row" id="ratingRow">
+      <button class="rate-btn" data-r="1">1</button>
+      <button class="rate-btn" data-r="2">2</button>
+      <button class="rate-btn" data-r="3">3</button>
+      <button class="rate-btn" data-r="4">4</button>
+      <button class="rate-btn" data-r="5">5</button>
+      <button class="rate-btn" data-r="6">6</button>
+      <button class="rate-btn" data-r="7">7</button>
+      <button class="rate-btn" data-r="8">8</button>
+      <button class="rate-btn" data-r="9">9</button>
+      <button class="rate-btn" data-r="10">10</button>
+    </div>
+    <div id="ratingDisplay" class="rating-display">尚未評分</div>
   </div>
 
   <footer>
@@ -912,6 +986,68 @@ personaResults.addEventListener('click', e=>{
 
   if(e.target.closest('.persona-copy-btn')){
     copyText(card.querySelector('.persona-text').textContent);
+  }
+});
+
+// 使用者評分機制:1~10分,點擊後即時更新顯示文字與反應
+// 同時串接免費、不需申請帳號的公開計數服務(CountAPI的替代服務),讓所有人、不同裝置的評分能共用同一個平均值
+// 原理:每個分數(1~10)各自對應一個計數器,每次評分就把該分數的計數器+1,平均值 = Σ(分數×次數) / Σ(次數)
+const ratingRow = document.getElementById('ratingRow');
+const ratingDisplay = document.getElementById('ratingDisplay');
+const ratingGlobalDisplay = document.getElementById('ratingGlobalDisplay');
+const RATING_API = "https://countapi.mileshilliard.com/api/v1";
+const RATING_KEY_PREFIX = "cmthlp88kenq-r"; // 每個小幫手專案用不同的獨特字串,避免跟別人的計數器互相干擾
+
+function ratingReaction(score){
+  if(score <= 3) return `😥 謝謝你的誠實回饋,我會繼續努力改進！`;
+  if(score <= 6) return `🙂 謝謝評分,我會再加油做得更好！`;
+  if(score <= 8) return `😄 太好了,謝謝支持,很開心能幫上忙！`;
+  return `🥳 哇！謝謝這麼高的評分,超開心的！`;
+}
+
+async function fetchRatingCounts(){
+  const requests = [];
+  for(let i=1;i<=10;i++){
+    requests.push(
+      fetch(`${RATING_API}/get/${RATING_KEY_PREFIX}${i}`)
+        .then(r=> r.ok ? r.json() : {value:0})
+        .catch(()=>({value:0}))
+    );
+  }
+  const results = await Promise.all(requests);
+  return results.map(r=>Number(r.value)||0); // counts[i-1] = 第i分被評的次數
+}
+
+async function refreshGlobalRating(){
+  try{
+    const counts = await fetchRatingCounts();
+    let sum = 0, total = 0;
+    counts.forEach((c, i)=>{ const score = i+1; sum += score*c; total += c; });
+    if(total === 0){
+      ratingGlobalDisplay.textContent = '⭐ 目前還沒有人評分,當第一個吧！';
+    } else {
+      ratingGlobalDisplay.textContent = `⭐ 所有人平均評分：${(sum/total).toFixed(1)} 分（共 ${total} 人評分）`;
+    }
+  }catch(err){
+    ratingGlobalDisplay.textContent = '⚠️ 無法連線取得平均評分(此功能需要網路連線)';
+  }
+}
+
+refreshGlobalRating(); // 頁面載入時先讀取一次目前的平均
+
+ratingRow.addEventListener('click', async e=>{
+  const btn = e.target.closest('.rate-btn');
+  if(!btn) return;
+  const score = Number(btn.dataset.r);
+  ratingRow.querySelectorAll('.rate-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ratingDisplay.textContent = `你的評分：${score} / 10　${ratingReaction(score)}`;
+
+  try{
+    await fetch(`${RATING_API}/hit/${RATING_KEY_PREFIX}${score}`);
+    await refreshGlobalRating(); // 送出後立刻重新整理平均值
+  }catch(err){
+    ratingGlobalDisplay.textContent = '⚠️ 評分送出失敗,請確認網路連線';
   }
 });
 
